@@ -18,21 +18,24 @@ public class HistoryServiceImpl implements HistoryService{
 
 
 
+    /** 히스토리 등록 */
+    public void save(Double latitude, Double longitude) {
+        historyRepository.save(latitude, longitude);
+    }
+
+    /** 히스토리 전체조회 */
+    public List<HistoryDto.Response> getHistoryDtoList(Integer limit, OrderBy orderBy) {
+        return historyRepository.findAll(limit, orderBy).stream()
+                .map(HistoryDto.Response::new)
+                .collect(Collectors.toList());
+    }
+
+    /** 히스토리 삭제 */
     public void delete(Long id) {
 
         History history = historyRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("존재하지 않는 히스토리 id=" + id));
 
         historyRepository.deleteById(history.getId());
-    }
-
-    public void save(Double latitude, Double longitude) {
-        historyRepository.save(latitude, longitude);
-    }
-
-    public List<HistoryDto.Response> getHistoryDtoList(Integer limit, OrderBy orderBy) {
-        return historyRepository.findAll(limit, orderBy).stream()
-                .map(HistoryDto.Response::new)
-                .collect(Collectors.toList());
     }
 }

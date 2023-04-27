@@ -8,12 +8,16 @@ import java.util.Optional;
 
 
 public interface HistoryRepository {
+    /** 히스토리 등록 */
     int save(Double latitude, Double longitude);
 
+    /** 히스토리 단건 조회 */
     Optional<History> findById(Long id);
 
-    int deleteById(Long id);
-
+    /** 히스토리 전체 조회 */
     List<History> findAll(Integer limit, OrderBy orderBy );
+
+    /** 히스토리 단건 삭제 */
+    int deleteById(Long id);
 
 }

@@ -2,6 +2,7 @@ package com.zerobase.zerobasestudy.repository.history;
 
 import com.zerobase.zerobasestudy.entity.history.History;
 import com.zerobase.zerobasestudy.util.constutil.OrderBy;
+import com.zerobase.zerobasestudy.util.exception.SqlException;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -19,7 +20,7 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
         this.dataSource = dataSource;
     }
 
-
+    /** 히스토리 등록 */
     public int save(Double latitude, Double longitude) {
         String sql = "INSERT INTO history (longitude, latitude, created) "
                 + "VALUES (?, ?, ?)";
@@ -38,14 +39,15 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
             return stmt.executeUpdate();
 
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException cause) {
+            throw new SqlException(cause.getMessage(), cause);
         } finally {
             close(conn, stmt, null);
         }
 
     }
 
+    /** 히스토리 단건 조회 */
     public Optional<History> findById(Long id) {
         String sql = "SELECT id, longitude, latitude, created FROM history "
                 + "where id = ?";
@@ -71,36 +73,12 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
 
             return Optional.empty();
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException cause) {
+            throw new SqlException(cause.getMessage(), cause);
         }
     }
 
-
-    public int deleteById(Long id) {
-        String sql = "delete from history where id = ?";
-
-        Connection conn = null;
-        PreparedStatement stmt = null;
-
-
-        try {
-            conn = dataSource.getConnection();
-            stmt = conn.prepareStatement(sql);
-            stmt.setLong(1, id);
-
-
-            return stmt.executeUpdate();
-
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            close(conn, stmt, null);
-        }
-
-    }
-
+    /** 히스토리 전체 조회 */
     public List<History> findAll(Integer limit, OrderBy orderBy) {
         String sql = "SELECT id, longitude, latitude, created FROM history";
 
@@ -129,34 +107,61 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
                 histories.add(history);
             }
             return histories;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException cause) {
+            throw new SqlException(cause.getMessage(), cause);
         } finally {
             close(conn, stmt, rs);
         }
     }
 
+    /** 히스토리 단건 삭제 */
+    public int deleteById(Long id) {
+        String sql = "delete from history where id = ?";
 
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+
+        try {
+            conn = dataSource.getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setLong(1, id);
+
+
+            return stmt.executeUpdate();
+
+
+        } catch (SQLException cause) {
+            throw new SqlException(cause.getMessage(), cause);
+        } finally {
+            close(conn, stmt, null);
+        }
+
+    }
+
+
+
+    /** 커넥션 종료(반환) */
     private void close(Connection conn, Statement stmt, ResultSet rs) {
         if (rs != null) {
             try {
                 rs.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+            } catch (SQLException cause) {
+                throw new SqlException(cause.getMessage(), cause);
             }
         }
         if (stmt != null) {
             try {
                 stmt.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+            } catch (SQLException cause) {
+                throw new SqlException(cause.getMessage(), cause);
             }
         }
         if (conn != null) {
             try {
                 conn.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+            } catch (SQLException cause) {
+                throw new SqlException(cause.getMessage(), cause);
             }
         }
     }

@@ -18,7 +18,7 @@ public class WifiController implements Controller {
         this.wifiService = wifiService;
         this.historyService = historyService;
     }
-
+    /** 와이파이 전체 조회 */
     public String get(Map<String, String> paramMap, Map<String, Object> model){
 
         String latitudeStr = paramMap.get("latitude");
@@ -46,7 +46,7 @@ public class WifiController implements Controller {
         return "wifiList";
     }
 
-
+    /** 오픈 api 를 통한 와이파이 와이파이 등록 */
     public String post(Map<String, String> paramMap, Map<String, Object> model)  {
         //전체 db 삭제
         wifiService.deleteAll();
@@ -98,6 +98,7 @@ public class WifiController implements Controller {
         return null;
     }
 
+    /** Long 자료형 검증 */
     private static Double isValidDouble(String arg) {
         try{
             Double value = Double.parseDouble(arg);

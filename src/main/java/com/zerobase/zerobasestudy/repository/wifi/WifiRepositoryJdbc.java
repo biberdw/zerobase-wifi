@@ -3,6 +3,7 @@ package com.zerobase.zerobasestudy.repository.wifi;
 import com.zerobase.zerobasestudy.dto.wifi.WifiDto;
 import com.zerobase.zerobasestudy.entity.history.History;
 import com.zerobase.zerobasestudy.entity.wifi.Wifi;
+import com.zerobase.zerobasestudy.util.exception.SqlException;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -33,8 +34,8 @@ public class WifiRepositoryJdbc implements WifiRepository {
             if(rs.next()){
               return rs.getInt(1);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException cause) {
+            throw new SqlException(cause.getMessage(), cause);
         } finally {
             close(conn, stmt, rs);
         }
@@ -86,8 +87,8 @@ public class WifiRepositoryJdbc implements WifiRepository {
             System.out.println(result.length);
             return result.length;
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException cause) {
+            throw new SqlException(cause.getMessage(), cause);
         } finally {
             close(conn, stmt, null);
         }
@@ -107,8 +108,8 @@ public class WifiRepositoryJdbc implements WifiRepository {
             stmt.executeUpdate();
 
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException cause) {
+            throw new SqlException(cause.getMessage(), cause);
         } finally {
             close(conn, stmt, null);
         }
@@ -166,8 +167,8 @@ public class WifiRepositoryJdbc implements WifiRepository {
 
             return list;
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException cause) {
+            throw new SqlException(cause.getMessage(), cause);
         } finally {
             close(conn, stmt, rs);
         }
@@ -178,22 +179,22 @@ public class WifiRepositoryJdbc implements WifiRepository {
         if (rs != null) {
             try {
                 rs.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+            } catch (SQLException cause) {
+                throw new SqlException(cause.getMessage(), cause);
             }
         }
         if (stmt != null) {
             try {
                 stmt.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+            } catch (SQLException cause) {
+                throw new SqlException(cause.getMessage(), cause);
             }
         }
         if (conn != null) {
             try {
                 conn.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+            } catch (SQLException cause) {
+                throw new SqlException(cause.getMessage(), cause);
             }
         }
     }

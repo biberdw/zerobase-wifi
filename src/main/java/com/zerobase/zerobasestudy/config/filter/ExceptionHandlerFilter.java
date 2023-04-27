@@ -4,8 +4,10 @@ import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import java.io.IOException;
 
+/** 예외 처리를 위한 필터 */
 @WebFilter(filterName = "ExceptionHandlerFilter", urlPatterns = "/*")
 public class ExceptionHandlerFilter implements Filter {
+
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

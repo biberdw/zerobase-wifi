@@ -2,6 +2,9 @@ package com.zerobase.zerobasestudy.config.init;
 
 import okhttp3.OkHttpClient;
 
+/**
+ * 오픈 api 의 요청을 위한 라이브러리 객체
+ */
 public class OkHttpClientSingleton {
     private static OkHttpClient instance;
 

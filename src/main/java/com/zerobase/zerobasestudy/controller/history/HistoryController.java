@@ -3,9 +3,6 @@ package com.zerobase.zerobasestudy.controller.history;
 import com.zerobase.zerobasestudy.controller.Controller;
 import com.zerobase.zerobasestudy.dto.history.HistoryDto;
 import com.zerobase.zerobasestudy.service.history.HistoryService;
-import com.zerobase.zerobasestudy.util.constutil.OrderBy;
-
-
 import java.util.List;
 import java.util.Map;
 
@@ -19,10 +16,10 @@ public class HistoryController implements Controller {
         this.historyService = historyService;
     }
 
+    /** 히스토리 전체조회 */
     public String get(Map<String, String> paramMap, Map<String, Object> model) {
         Integer limit = null;
         List<HistoryDto.Response> histories = historyService.getHistoryDtoList(limit, ID_DESC);
-
 
         model.put("histories", histories);
         return "history";
@@ -38,11 +35,15 @@ public class HistoryController implements Controller {
         return null;
     }
 
-
+    /** 히스토리 단건삭제 */
     public String delete(Map<String, String> paramMap, Map<String, Object> model){
+        //파라미터로 온 id 조회
         String idStr = paramMap.get("id");
 
+        //유효성 검증
         Long id = isValidLong(idStr);
+
+        //히스토리 삭제
         historyService.delete(id);
         return "redirect:/apps/histories";
 

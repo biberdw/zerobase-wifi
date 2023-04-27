@@ -12,10 +12,10 @@ public class HistoryDto {
     @Data
     @NoArgsConstructor
     public static class Response{
-        private Long id;
-        private Double longitude;
-        private Double latitude;
-        private LocalDateTime created;
+        private Long id; //pk
+        private Double longitude; //경도
+        private Double latitude; //위도
+        private LocalDateTime created; //등록일
 
         public Response(History history) {
             this.id = history.getId();

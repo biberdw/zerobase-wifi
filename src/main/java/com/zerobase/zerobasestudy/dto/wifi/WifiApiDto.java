@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Data
 public class WifiApiDto {
 
-    private static String API_URL = "http://openapi.seoul.go.kr:8088/564f4345626269623831506951736a/json/TbPublicWifiInfo/";
+    private static final String API_URL = "http://openapi.seoul.go.kr:8088/564f4345626269623831506951736a/json/TbPublicWifiInfo/";
 
 
     @JsonProperty("TbPublicWifiInfo")

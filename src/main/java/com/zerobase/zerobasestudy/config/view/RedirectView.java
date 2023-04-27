@@ -14,6 +14,7 @@ public class RedirectView implements View {
         this.viewPath = viewPath;
     }
 
+    /** 리다이렉트 */
     public void render(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.sendRedirect(viewPath);
     }

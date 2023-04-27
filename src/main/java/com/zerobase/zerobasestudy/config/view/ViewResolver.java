@@ -21,8 +21,7 @@ public class ViewResolver {
 
     public View resolveViewName(String viewName){
         if (viewName.startsWith("redirect:")) {
-            RedirectView redirectView = new RedirectView(viewName.substring("redirect:".length()));
-            return redirectView;
+            return new RedirectView(viewName.substring("redirect:".length()));
         } else {
             return new BasicView(prefix + viewName + suffix);
         }

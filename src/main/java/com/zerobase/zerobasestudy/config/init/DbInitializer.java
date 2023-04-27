@@ -2,6 +2,7 @@ package com.zerobase.zerobasestudy.config.init;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import com.zerobase.zerobasestudy.util.exception.SqlException;
 
 import javax.sql.DataSource;
 
@@ -14,10 +15,12 @@ public class DbInitializer {
     private DbInitializer(){
     }
 
-    public static synchronized javax.sql.DataSource getDataSource() {
+    /** db 정보 등록 및 싱글톤관리 */
+    public static synchronized DataSource getDataSource() {
         if (dataSource == null) {
             try {
                 Class.forName(DRIVER);
+                //히카리 라이브러리로 커넥션 풀 관리
                 HikariConfig config = new HikariConfig();
 
                 config.setJdbcUrl(URL);
@@ -28,8 +31,8 @@ public class DbInitializer {
 
                 dataSource = new HikariDataSource(config);
 
-            }catch (ClassNotFoundException e){
-                throw new IllegalStateException("데이터베이스 연결 실패");
+            }catch (ClassNotFoundException cause){
+                throw new SqlException("데이터베이스 연결 실패", cause);
             }
         }
         return dataSource;
