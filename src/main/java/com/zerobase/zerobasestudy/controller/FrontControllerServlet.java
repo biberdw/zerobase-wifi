@@ -28,7 +28,6 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.*;
 
-import static javax.servlet.http.HttpServletResponse.*;
 
 @WebServlet("/apps/*")
 public class FrontControllerServlet extends HttpServlet {
@@ -46,27 +45,31 @@ public class FrontControllerServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //URL 에 맞는 등록된 컨트롤러를 찾아온다
         Object handler = getHandler(request);
 
 
         if (handler == null) {
-            String requestURI = request.getRequestURI();
-            System.out.println(requestURI);
-            System.out.println("NOT_FOUND");
-            response.setStatus(SC_NOT_FOUND);
-
+            throw new IllegalStateException("요청하신 주소를 찾지 못하였습니다 {" + request.getRequestURI() + "}");
         }
 
+
+        //컨트롤러를 지원하는 어답터를 찾아보고 등록된 어답터가 있으면 가져온다
         HandlerAdapter adapter = getHandlerAdapter(handler);
 
+        //어답터로 애플리케이션 로직 수행 후 모델과 뷰이름 반환받기
         ModelAndView mv = adapter.handle(request, response, handler);
 
+        //뷰이름이 리다이렉트인지 아닌지 검사 후 뷰페이지 경로 반환받음
         ViewResolver viewResolver = new ViewResolver();
         View view = viewResolver.resolveViewName(mv.getViewName());
+
+        //반환받은 뷰로 페이지 렌더링
         view.render(mv.getModel(), request, response);
 
     }
 
+    /** 컨트롤러를 지원하는 어답터를 찾는다 */
     private HandlerAdapter getHandlerAdapter(Object handler) {
         for (HandlerAdapter adapter : handlerAdapters) {
             if (adapter.supports(handler)) {
@@ -76,13 +79,14 @@ public class FrontControllerServlet extends HttpServlet {
         throw new IllegalArgumentException("handler adapter 를 찾을 수 없습니다. handler=" + handler);
     }
 
+    /** url 과 일치하는 컨트롤러를 Map 에서 찾아준다 */
     private Object getHandler(HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         return handleMappingMap.get(requestURI);
 
     }
 
-
+    /** 각 객체들을 싱글톤으로 관리할 수 있도로 초기화 작업 및 url 에 각 컨트롤러 등록 */
     private void initHandlerMappingMap() {
         DataSource dataSource = DbInitializer.getDataSource();
         //히스토리 초기화
@@ -99,6 +103,7 @@ public class FrontControllerServlet extends HttpServlet {
         handleMappingMap.put("/apps/wifi", wifiController);
     }
 
+    /** 어답터 등록 */
     private void initHandlerAdapters() {
         handlerAdapters.add(new ControllerHandlerAdapter());
     }
