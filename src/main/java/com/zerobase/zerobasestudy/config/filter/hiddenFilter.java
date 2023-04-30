@@ -6,12 +6,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
 /** PUT / DELETE 메소드 처리를 위한 필터 */
+
 @WebFilter("/apps/*")
 public class hiddenFilter implements Filter {
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
 
         HttpServletRequest request = (HttpServletRequest) req;
+        request.setCharacterEncoding("UTF-8");
 
         // POST 요청이면서 "_method" 파라미터가 존재할 경우 메소드를 변경
         if ("POST".equals(request.getMethod()) && request.getParameter("_method") != null) {
@@ -23,6 +25,7 @@ public class hiddenFilter implements Filter {
         } else {
             chain.doFilter(request, res);
         }
+
 
     }
 
@@ -41,3 +44,4 @@ public class hiddenFilter implements Filter {
         }
     }
 }
+
