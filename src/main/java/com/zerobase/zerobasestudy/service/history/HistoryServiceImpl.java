@@ -4,9 +4,6 @@ import com.zerobase.zerobasestudy.dto.history.HistoryDto;
 import com.zerobase.zerobasestudy.entity.history.History;
 import com.zerobase.zerobasestudy.repository.history.HistoryRepository;
 import com.zerobase.zerobasestudy.util.Sort;
-import com.zerobase.zerobasestudy.util.constutil.OrderBy;
-
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
