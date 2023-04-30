@@ -1,0 +1,4 @@
+td a {
+    display: inline-block;
+    margin-right: 10px; /* 수정과 삭제 간격 조절 */
+}
