@@ -22,7 +22,7 @@
 
 -- mysql;
 CREATE TABLE WIFI (
-        id INT PRIMARY KEY AUTO_INCREMENT,
+        wifi_id INT PRIMARY KEY AUTO_INCREMENT,
         control_number VARCHAR(255),
         borough VARCHAR(255),
         name VARCHAR(255),
@@ -42,8 +42,16 @@ CREATE TABLE WIFI (
 );
 
 CREATE TABLE History (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    history_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     longitude DOUBLE NOT NULL,
     latitude DOUBLE NOT NULL,
     created DATETIME NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE Bookmark (
+    bookmark_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    sequence_num INT NOT NULL,
+    created DATETIME DEFAULT NOW(),
+    modified DATETIME DEFAULT NOW()
 );
