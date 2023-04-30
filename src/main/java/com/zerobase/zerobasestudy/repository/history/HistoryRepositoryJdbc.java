@@ -1,6 +1,7 @@
 package com.zerobase.zerobasestudy.repository.history;
 
 import com.zerobase.zerobasestudy.entity.history.History;
+import com.zerobase.zerobasestudy.util.Sort;
 import com.zerobase.zerobasestudy.util.constutil.OrderBy;
 import com.zerobase.zerobasestudy.util.exception.SqlException;
 
@@ -49,8 +50,8 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
 
     /** 히스토리 단건 조회 */
     public Optional<History> findById(Long id) {
-        String sql = "SELECT id, longitude, latitude, created FROM history "
-                + "where id = ?";
+        String sql = "SELECT history_id, longitude, latitude, created FROM history "
+                + "where history_id = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -64,7 +65,7 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
 
             if(rs.next()){
                 return Optional.ofNullable(History.builder()
-                        .id(rs.getLong("id"))
+                        .id(rs.getLong("history_id"))
                         .longitude(rs.getDouble("longitude"))
                         .latitude(rs.getDouble("latitude"))
                         .created(rs.getTimestamp("created").toLocalDateTime())
@@ -75,14 +76,16 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
 
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
+        } finally {
+            close(conn, stmt, rs);
         }
     }
 
     /** 히스토리 전체 조회 */
-    public List<History> findAll(Integer limit, OrderBy orderBy) {
-        String sql = "SELECT id, longitude, latitude, created FROM history";
+    public List<History> findAll(Integer limit, Sort sort) {
+        String sql = "SELECT history_id, longitude, latitude, created FROM history";
 
-        if(orderBy != null) sql += " ORDER BY " + orderBy.getOrderBy();
+        if(sort != null) sql += " ORDER BY " + sort.getOrderBy();
         if(limit != null && limit > 0) sql += " LIMIT "  + limit;
 
         Connection conn = null;
@@ -99,7 +102,7 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
             List<History> histories = new ArrayList<>();
             while(rs.next()){
                 History history = History.builder()
-                        .id(rs.getLong("id"))
+                        .id(rs.getLong("history_id"))
                         .longitude(rs.getDouble("longitude"))
                         .latitude(rs.getDouble("latitude"))
                         .created(rs.getTimestamp("created").toLocalDateTime())
@@ -116,7 +119,7 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
 
     /** 히스토리 단건 삭제 */
     public int deleteById(Long id) {
-        String sql = "delete from history where id = ?";
+        String sql = "delete from history where history_id = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;

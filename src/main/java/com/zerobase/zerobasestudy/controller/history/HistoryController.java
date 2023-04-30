@@ -18,8 +18,8 @@ public class HistoryController implements Controller {
 
     /** 히스토리 전체조회 */
     public String get(Map<String, String> paramMap, Map<String, Object> model) {
-        Integer limit = null;
-        List<HistoryDto.Response> histories = historyService.getHistoryDtoList(limit, ID_DESC);
+
+        List<HistoryDto.Response> histories = historyService.getHistoryDtoList();
 
         model.put("histories", histories);
         return "history";
@@ -42,7 +42,6 @@ public class HistoryController implements Controller {
 
         //유효성 검증
         Long id = isValidLong(idStr);
-
         //히스토리 삭제
         historyService.delete(id);
         return "redirect:/apps/histories";

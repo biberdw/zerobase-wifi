@@ -3,8 +3,10 @@ package com.zerobase.zerobasestudy.service.history;
 import com.zerobase.zerobasestudy.dto.history.HistoryDto;
 import com.zerobase.zerobasestudy.entity.history.History;
 import com.zerobase.zerobasestudy.repository.history.HistoryRepository;
+import com.zerobase.zerobasestudy.util.Sort;
 import com.zerobase.zerobasestudy.util.constutil.OrderBy;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,8 +26,10 @@ public class HistoryServiceImpl implements HistoryService{
     }
 
     /** 히스토리 전체조회 */
-    public List<HistoryDto.Response> getHistoryDtoList(Integer limit, OrderBy orderBy) {
-        return historyRepository.findAll(limit, orderBy).stream()
+    public List<HistoryDto.Response> getHistoryDtoList() {
+
+        Sort sort = new Sort("history_id", Sort.Direction.DESC);
+        return historyRepository.findAll(null, sort).stream()
                 .map(HistoryDto.Response::new)
                 .collect(Collectors.toList());
     }

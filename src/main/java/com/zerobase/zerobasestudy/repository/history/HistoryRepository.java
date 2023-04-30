@@ -1,6 +1,7 @@
 package com.zerobase.zerobasestudy.repository.history;
 
 import com.zerobase.zerobasestudy.entity.history.History;
+import com.zerobase.zerobasestudy.util.Sort;
 import com.zerobase.zerobasestudy.util.constutil.OrderBy;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public interface HistoryRepository {
     Optional<History> findById(Long id);
 
     /** 히스토리 전체 조회 */
-    List<History> findAll(Integer limit, OrderBy orderBy );
+    List<History> findAll(Integer limit, Sort sort);
 
     /** 히스토리 단건 삭제 */
     int deleteById(Long id);

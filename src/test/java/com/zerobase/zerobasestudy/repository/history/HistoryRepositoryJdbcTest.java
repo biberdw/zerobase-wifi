@@ -3,12 +3,14 @@ package com.zerobase.zerobasestudy.repository.history;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zerobase.zerobasestudy.entity.history.History;
+import com.zerobase.zerobasestudy.util.Sort;
 import com.zerobase.zerobasestudy.util.constutil.OrderBy;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.zerobase.zerobasestudy.util.constutil.DatabaseConst.*;
@@ -33,8 +35,9 @@ class HistoryRepositoryJdbcTest {
     @Test
     @DisplayName("전체 조회")
     void findAll() {
+        Sort sort = new Sort("history_id", Sort.Direction.DESC);
 
-        List<History> histories = repository.findAll(5, OrderBy.ID_DESC);
+        List<History> histories = repository.findAll(5, sort);
         for (History history : histories) {
             System.out.println("history.getId() = " + history.getId());
         }
