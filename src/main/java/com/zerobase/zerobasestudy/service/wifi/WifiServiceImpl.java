@@ -29,6 +29,12 @@ public class WifiServiceImpl implements WifiService{
         wifiRepository.deleteAll();
     }
 
+    /** 와이파이 단건 조회 */
+    public WifiDto.Response getWifiDto(Long id) {
+        Wifi wifi = wifiRepository.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("존재하지 않는 와이파이 입니다. id = " + id));
+        return new WifiDto.Response(wifi);
+    }
 
 
     public int count() {

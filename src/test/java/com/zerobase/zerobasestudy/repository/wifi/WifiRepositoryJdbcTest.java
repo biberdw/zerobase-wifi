@@ -1,4 +1,4 @@
-package com.zerobase.zerobasestudy.repository;
+package com.zerobase.zerobasestudy.repository.wifi;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -6,6 +6,7 @@ import com.zerobase.zerobasestudy.dto.wifi.WifiDto;
 import com.zerobase.zerobasestudy.entity.wifi.Wifi;
 import com.zerobase.zerobasestudy.repository.wifi.WifiRepository;
 import com.zerobase.zerobasestudy.repository.wifi.WifiRepositoryJdbc;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.zerobase.zerobasestudy.util.constutil.DatabaseConst.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -124,5 +126,13 @@ class WifiRepositoryJdbcTest {
         assertEquals(20, findList.size());
     }
 
+    @Test
+    @DisplayName("단건조회")
+    void 단건조회(){
+        Optional<Wifi> find = repository.findById(24082L);
+        Wifi wifi = find.get();
+        Assertions.assertEquals(24082L, wifi.getId());
+
+    }
 
 }

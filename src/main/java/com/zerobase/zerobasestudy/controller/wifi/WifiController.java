@@ -1,9 +1,11 @@
 package com.zerobase.zerobasestudy.controller.wifi;
 
 import com.zerobase.zerobasestudy.controller.Controller;
+import com.zerobase.zerobasestudy.dto.bookmark.BookmarkDto;
 import com.zerobase.zerobasestudy.dto.wifi.WifiApiDto;
 import com.zerobase.zerobasestudy.dto.wifi.WifiDto;
 import com.zerobase.zerobasestudy.entity.wifi.Wifi;
+import com.zerobase.zerobasestudy.service.bookmark.BookmarkService;
 import com.zerobase.zerobasestudy.service.history.HistoryService;
 import com.zerobase.zerobasestudy.service.wifi.WifiService;
 import java.util.List;
@@ -13,16 +15,28 @@ public class WifiController implements Controller {
 
     private final WifiService wifiService;
     private final HistoryService historyService;
+    private final BookmarkService bookmarkService;
 
-    public WifiController(WifiService wifiService, HistoryService historyService) {
+    public WifiController(WifiService wifiService, HistoryService historyService,BookmarkService bookmarkService) {
         this.wifiService = wifiService;
         this.historyService = historyService;
+        this.bookmarkService = bookmarkService;
     }
-    /** 와이파이 전체 조회 */
+    /** 와이파이 조회 */
     public String get(Map<String, String> paramMap, Map<String, Object> model){
-
+        String idStr = paramMap.get("id");
         String latitudeStr = paramMap.get("latitude");
         String longitudeStr = paramMap.get("longitude");
+
+        //id가 있었을때(단건조회)
+        if(idStr != null){
+            Long id = isValidLong(idStr);
+            WifiDto.Response wifiDto = wifiService.getWifiDto(id);
+            List<BookmarkDto.Response> bookmarks = bookmarkService.getDtoListOrderBySeq();
+            model.put("bookmarks", bookmarks);
+            model.put("wifiDto", wifiDto);
+            return "wifiDetail";
+        }
 
 
         //좌표가 있었을때
@@ -98,7 +112,16 @@ public class WifiController implements Controller {
         return null;
     }
 
-    /** Long 자료형 검증 */
+    private static Long isValidLong(String id) {
+        try{
+            Long value = Long.parseLong(id);
+            return value;
+        }catch (NumberFormatException e){
+            throw new IllegalArgumentException("잘못된 필드 = " + e);
+        }
+    }
+
+    /** Double 자료형 검증 */
     private static Double isValidDouble(String arg) {
         try{
             Double value = Double.parseDouble(arg);

@@ -10,7 +10,7 @@ public class WifiDto {
     @Data
     @NoArgsConstructor
     public static class Response {
-
+        private Long id;
         private String distance;
         private String controlNumber;
         private String borough;
@@ -30,7 +30,7 @@ public class WifiDto {
         private String workDate;
 
         public Response(Wifi wifi) {
-
+            this.id = wifi.getId();
             this.controlNumber = wifi.getControlNumber();
             this.borough = wifi.getBorough();
             this.name = wifi.getName();

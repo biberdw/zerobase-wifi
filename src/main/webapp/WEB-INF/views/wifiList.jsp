@@ -23,11 +23,12 @@
   <div>
       <h1>와이파이 정보 구하기</h1>
   </div>
-
   <div>
       <a href="/">홈</a>&nbsp;&nbsp;|&nbsp;
-      <a href="/apps/histories">위치 히스토리 목록</a>&nbsp;&nbsp;|&nbsp;
-      <a id="fetchWifi" href="#">Open API 와이파이 정보 가져오기</a>
+      <a href="/apps/histories">위치 히스토리 목록</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+      <a id="fetchWifi" href="#">Open API 와이파이 정보 가져오기</a>&nbsp;&nbsp;|&nbsp;
+      <a href="#">즐겨찾기 보기</a>&nbsp;&nbsp;|&nbsp;
+      <a href="/apps/bookmarks">즐겨찾기 그룹 관리</a>
   </div>
 
   <form method="get" action="/apps/wifi">
@@ -85,7 +86,7 @@
                       <td>${fn:substring(wifi.distance, 0, fn:length(wifi.distance) < 6 ? fn:length(wifi.distance) : 6)}</td>
                       <td>${wifi.controlNumber}</td>
                       <td>${wifi.borough}</td>
-                      <td>${wifi.name}</td>
+                      <td><a href="/apps/wifi?id=${wifi.id}">${wifi.name}</a></td>
                       <td>${wifi.address}</td>
                       <td>${wifi.detailedAddress}</td>
                       <td>${wifi.floor}</td>
