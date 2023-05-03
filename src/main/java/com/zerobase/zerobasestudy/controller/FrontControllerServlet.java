@@ -11,14 +11,13 @@ import com.zerobase.zerobasestudy.controller.bookmark.WifiBookmarkController;
 import com.zerobase.zerobasestudy.controller.history.HistoryController;
 
 import com.zerobase.zerobasestudy.controller.wifi.WifiController;
-import com.zerobase.zerobasestudy.repository.bookmark.BookmarkRepository;
-import com.zerobase.zerobasestudy.repository.bookmark.BookmarkRepositoryJdbc;
-import com.zerobase.zerobasestudy.repository.bookmark.WifiBookmarkRepository;
-import com.zerobase.zerobasestudy.repository.bookmark.WifiBookmarkRepositoryJdbc;
+import com.zerobase.zerobasestudy.repository.bookmark.*;
 import com.zerobase.zerobasestudy.repository.history.HistoryRepository;
 import com.zerobase.zerobasestudy.repository.history.HistoryRepositoryJdbc;
+import com.zerobase.zerobasestudy.repository.history.HistoryRepositoryJdbcV1;
 import com.zerobase.zerobasestudy.repository.wifi.WifiRepository;
 import com.zerobase.zerobasestudy.repository.wifi.WifiRepositoryJdbc;
+import com.zerobase.zerobasestudy.repository.wifi.WifiRepositoryJdbcV1;
 import com.zerobase.zerobasestudy.service.bookmark.BookmarkService;
 import com.zerobase.zerobasestudy.service.bookmark.BookmarkServiceImpl;
 import com.zerobase.zerobasestudy.service.bookmark.WifiBookmarkService;
@@ -28,6 +27,8 @@ import com.zerobase.zerobasestudy.service.history.HistoryServiceImpl;
 import com.zerobase.zerobasestudy.service.wifi.WifiService;
 import com.zerobase.zerobasestudy.service.wifi.WifiServiceImpl;
 import com.zerobase.zerobasestudy.config.init.DbInitializer;
+import com.zerobase.zerobasestudy.util.TxManagerJdbc;
+import com.zerobase.zerobasestudy.util.proxy.TxHandler;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -36,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.lang.reflect.Proxy;
 import java.util.*;
 
 
@@ -99,25 +101,42 @@ public class FrontControllerServlet extends HttpServlet {
     /** 각 객체들을 싱글톤으로 관리할 수 있도로 초기화 작업 및 url 에 각 컨트롤러 등록 */
     private void initHandlerMappingMap() {
         DataSource dataSource = DbInitializer.getDataSource();
+        //트랜잭션 매니저
+        TxManagerJdbc txManager = new TxManagerJdbc(dataSource);
+
         //히스토리 초기화
-        HistoryRepository historyRepository = new HistoryRepositoryJdbc(dataSource);
+        HistoryRepository historyRepository = new HistoryRepositoryJdbcV1(txManager);
         HistoryService historyService = new HistoryServiceImpl(historyRepository);
-        Controller historyController = new HistoryController(historyService);
+        HistoryService historyProxy = (HistoryService) Proxy.newProxyInstance(HistoryService.class.getClassLoader(),
+                new Class[]{HistoryService.class},
+                new TxHandler(historyService, txManager));
+        Controller historyController = new HistoryController(historyProxy);
+
 
         //북마크 초기화
-        BookmarkRepository bookmarkRepository = new BookmarkRepositoryJdbc(dataSource);
+        BookmarkRepository bookmarkRepository = new BookmarkRepositoryJdbcV1(txManager);
         BookmarkService bookmarkService = new BookmarkServiceImpl(bookmarkRepository);
-        Controller bookmarkController =  new BookmarkController(bookmarkService);
+        BookmarkService bookmarkProxy = (BookmarkService) Proxy.newProxyInstance(BookmarkService.class.getClassLoader(),
+                new Class[]{BookmarkService.class},
+                new TxHandler(bookmarkService, txManager));
+        Controller bookmarkController =  new BookmarkController(bookmarkProxy);
+
 
         //와이파이 초기화
-        WifiRepository wifiRepository = new WifiRepositoryJdbc(dataSource);
+        WifiRepository wifiRepository = new WifiRepositoryJdbcV1(txManager);
         WifiService wifiService = new WifiServiceImpl(wifiRepository);
-        Controller wifiController = new WifiController(wifiService, historyService, bookmarkService);
+        WifiService wifiProxy = (WifiService) Proxy.newProxyInstance(WifiService.class.getClassLoader(),
+                new Class[]{WifiService.class},
+                new TxHandler(wifiService, txManager));
+        Controller wifiController = new WifiController(wifiProxy, historyProxy, bookmarkProxy);
 
         //와이파이_북마크 초기화
-        WifiBookmarkRepository wifiBookmarkRepository = new WifiBookmarkRepositoryJdbc(dataSource);
+        WifiBookmarkRepository wifiBookmarkRepository = new WifiBookmarkRepositoryJdbcV1(txManager);
         WifiBookmarkService wifiBookmarkService = new WifiBookmarkServiceImpl(wifiRepository, bookmarkRepository, wifiBookmarkRepository);
-        Controller wifiBookmarkController = new WifiBookmarkController(wifiBookmarkService);
+        WifiBookmarkService wifiBookmarkProxy = (WifiBookmarkService) Proxy.newProxyInstance(WifiBookmarkService.class.getClassLoader(),
+                new Class[]{WifiBookmarkService.class},
+                new TxHandler(wifiBookmarkService, txManager));
+        Controller wifiBookmarkController = new WifiBookmarkController(wifiBookmarkProxy);
 
         handleMappingMap.put("/apps/histories", historyController);
         handleMappingMap.put("/apps/wifi", wifiController);

@@ -54,6 +54,8 @@ public class BookmarkServiceImpl implements BookmarkService{
         Bookmark bookmark = bookmarkRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("존재하지 않는 북마크 id= " + id));
 
+
+
         //둘중에 하나라도 변경이 있을 때
         if(!bookmark.getName().equals(name) || bookmark.getSequenceNum() != sequenceNum){
             //이름은 기존과 같지만 순서가 변경됐을 때
