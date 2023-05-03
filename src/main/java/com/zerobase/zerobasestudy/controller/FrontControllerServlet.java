@@ -7,17 +7,22 @@ import com.zerobase.zerobasestudy.config.view.ModelAndView;
 import com.zerobase.zerobasestudy.config.view.View;
 import com.zerobase.zerobasestudy.config.view.ViewResolver;
 import com.zerobase.zerobasestudy.controller.bookmark.BookmarkController;
+import com.zerobase.zerobasestudy.controller.bookmark.WifiBookmarkController;
 import com.zerobase.zerobasestudy.controller.history.HistoryController;
 
 import com.zerobase.zerobasestudy.controller.wifi.WifiController;
 import com.zerobase.zerobasestudy.repository.bookmark.BookmarkRepository;
 import com.zerobase.zerobasestudy.repository.bookmark.BookmarkRepositoryJdbc;
+import com.zerobase.zerobasestudy.repository.bookmark.WifiBookmarkRepository;
+import com.zerobase.zerobasestudy.repository.bookmark.WifiBookmarkRepositoryJdbc;
 import com.zerobase.zerobasestudy.repository.history.HistoryRepository;
 import com.zerobase.zerobasestudy.repository.history.HistoryRepositoryJdbc;
 import com.zerobase.zerobasestudy.repository.wifi.WifiRepository;
 import com.zerobase.zerobasestudy.repository.wifi.WifiRepositoryJdbc;
 import com.zerobase.zerobasestudy.service.bookmark.BookmarkService;
 import com.zerobase.zerobasestudy.service.bookmark.BookmarkServiceImpl;
+import com.zerobase.zerobasestudy.service.bookmark.WifiBookmarkService;
+import com.zerobase.zerobasestudy.service.bookmark.WifiBookmarkServiceImpl;
 import com.zerobase.zerobasestudy.service.history.HistoryService;
 import com.zerobase.zerobasestudy.service.history.HistoryServiceImpl;
 import com.zerobase.zerobasestudy.service.wifi.WifiService;
@@ -109,12 +114,15 @@ public class FrontControllerServlet extends HttpServlet {
         WifiService wifiService = new WifiServiceImpl(wifiRepository);
         Controller wifiController = new WifiController(wifiService, historyService, bookmarkService);
 
-
-
+        //와이파이_북마크 초기화
+        WifiBookmarkRepository wifiBookmarkRepository = new WifiBookmarkRepositoryJdbc(dataSource);
+        WifiBookmarkService wifiBookmarkService = new WifiBookmarkServiceImpl(wifiRepository, bookmarkRepository, wifiBookmarkRepository);
+        Controller wifiBookmarkController = new WifiBookmarkController(wifiBookmarkService);
 
         handleMappingMap.put("/apps/histories", historyController);
         handleMappingMap.put("/apps/wifi", wifiController);
         handleMappingMap.put("/apps/bookmarks", bookmarkController);
+        handleMappingMap.put("/apps/bookmarks/wifi" , wifiBookmarkController);
     }
 
     /** 어답터 등록 */

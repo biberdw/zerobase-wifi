@@ -26,14 +26,14 @@
     <a href="/">홈</a>&nbsp;&nbsp;|&nbsp;
     <a href="/apps/histories">위치 히스토리 목록</a>&nbsp;&nbsp;|&nbsp;&nbsp;
     <a id="fetchWifi" href="#">Open API 와이파이 정보 가져오기</a>&nbsp;&nbsp;|&nbsp;
-    <a href="#">즐겨찾기 보기</a>&nbsp;&nbsp;|&nbsp;
+    <a href="/apps/bookmarks/wifi">즐겨찾기 보기</a>&nbsp;&nbsp;|&nbsp;
     <a href="/apps/bookmarks">즐겨찾기 그룹 관리</a>
 </div>
 
 
 <div>
-    <form action="" method="post">
-        <select>
+    <form action="/apps/bookmarks/wifi" method="post">
+        <select name="bookmarkId">
             <c:choose>
                 <c:when test="${empty bookmarks}">
                     <option>즐겨찾기 그룹 이름 선택</option>
@@ -46,6 +46,7 @@
                 </c:otherwise>
             </c:choose>
         </select>
+        <input type="hidden" name="wifiId" value="${wifiDto.id}">
         <button type="submit">즐겨찾기 추가하기</button>
     </form>
 </div>

@@ -20,18 +20,9 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-  <div>
-      <h1>와이파이 정보 구하기</h1>
-  </div>
-  <div>
-      <a href="/">홈</a>&nbsp;&nbsp;|&nbsp;
-      <a href="/apps/histories">위치 히스토리 목록</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-      <a id="fetchWifi" href="#">Open API 와이파이 정보 가져오기</a>&nbsp;&nbsp;|&nbsp;
-      <a href="#">즐겨찾기 보기</a>&nbsp;&nbsp;|&nbsp;
-      <a href="/apps/bookmarks">즐겨찾기 그룹 관리</a>
-  </div>
+<jsp:include page="/WEB-INF/views/inc/header/header.jsp"/>
 
-  <form method="get" action="/apps/wifi">
+<form method="get" action="/apps/wifi">
       <div>
           <label for="latitude">LAT:</label>
           <input id="latitude" type="text" name="latitude"
@@ -39,7 +30,6 @@
                      <c:when test='${empty latitude}'>value="0.0"</c:when>
                      <c:otherwise>value="${latitude}"</c:otherwise>
                  </c:choose>/>
-          
           <label for="longitude">LNT:</label>
           <input id="longitude" type="text" name="longitude"
                   <c:choose>
