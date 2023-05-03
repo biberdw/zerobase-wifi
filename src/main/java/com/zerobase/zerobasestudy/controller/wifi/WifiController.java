@@ -32,7 +32,7 @@ public class WifiController implements Controller {
         if(idStr != null){
             Long id = isValidLong(idStr);
             WifiDto.Response wifiDto = wifiService.getWifiDto(id);
-            List<BookmarkDto.Response> bookmarks = bookmarkService.getDtoListOrderBySeq();
+            List<BookmarkDto.Response> bookmarks = bookmarkService.getDtoListExcludingWifi(id);
             model.put("bookmarks", bookmarks);
             model.put("wifiDto", wifiDto);
             return "wifiDetail";
@@ -61,7 +61,7 @@ public class WifiController implements Controller {
     }
 
     /** 오픈 api 를 통한 와이파이 와이파이 등록 */
-    public String post(Map<String, String> paramMap, Map<String, Object> model)  {
+    public synchronized String post(Map<String, String> paramMap, Map<String, Object> model)  {
         //전체 db 삭제
         wifiService.deleteAll();
 
