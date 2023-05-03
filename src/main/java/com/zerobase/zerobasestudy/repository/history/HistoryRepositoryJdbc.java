@@ -8,6 +8,7 @@ import com.zerobase.zerobasestudy.util.exception.SqlException;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -68,7 +69,7 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
                         .id(rs.getLong("history_id"))
                         .longitude(rs.getDouble("longitude"))
                         .latitude(rs.getDouble("latitude"))
-                        .created(rs.getTimestamp("created").toLocalDateTime())
+                        .created(LocalDateTime.parse(rs.getString("created"), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                         .build());
             }
 
@@ -105,7 +106,7 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
                         .id(rs.getLong("history_id"))
                         .longitude(rs.getDouble("longitude"))
                         .latitude(rs.getDouble("latitude"))
-                        .created(rs.getTimestamp("created").toLocalDateTime())
+                        .created(LocalDateTime.parse(rs.getString("created"), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                         .build();
                 histories.add(history);
             }

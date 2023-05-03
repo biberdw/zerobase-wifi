@@ -8,6 +8,7 @@ import com.zerobase.zerobasestudy.util.exception.SqlException;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -214,7 +215,7 @@ public class WifiRepositoryJdbc implements WifiRepository {
                         .connEnv(rs.getString("conn_env"))
                         .longitude(rs.getDouble("longitude"))
                         .latitude(rs.getDouble("latitude"))
-                        .workDate(rs.getTimestamp("work_date").toLocalDateTime())
+                        .workDate(LocalDateTime.parse(rs.getString("work_date"), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                         .build());
             }
             return Optional.empty();
