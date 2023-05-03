@@ -24,10 +24,11 @@ public class DbInitializer {
                 HikariConfig config = new HikariConfig();
 
                 config.setJdbcUrl(URL);
-                config.setUsername(USERNAME);
-                config.setPassword(PASSWORD);
+//                config.setUsername(USERNAME);
+//                config.setPassword(PASSWORD);
                 config.setMaximumPoolSize(10);
                 config.setDriverClassName(DRIVER);
+
 
                 dataSource = new HikariDataSource(config);
 
