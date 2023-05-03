@@ -42,11 +42,17 @@ public class BookmarkServiceImpl implements BookmarkService{
                 .map(BookmarkDto.Response::new).collect(Collectors.toList());
     }
 
+    /** 와이파이가 등록된 북마크 제외한 전체리스트 */
+    public List<BookmarkDto.Response> getDtoListExcludingWifi(Long wifiId) {
+        Sort sort = new Sort("sequence_num", Sort.Direction.ASC);
+        return bookmarkRepository.findAllExcludingWifi(wifiId, null, sort).stream()
+                .map(BookmarkDto.Response::new).collect(Collectors.toList());
+    }
+
     /** 북마크 수정 */
     public void update(Long id, String name, Integer sequenceNum) {
         Bookmark bookmark = bookmarkRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("존재하지 않는 북마크 id= " + id));
-
 
         //둘중에 하나라도 변경이 있을 때
         if(!bookmark.getName().equals(name) || bookmark.getSequenceNum() != sequenceNum){

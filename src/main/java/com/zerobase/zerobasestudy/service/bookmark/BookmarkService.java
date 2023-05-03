@@ -17,6 +17,10 @@ public interface BookmarkService {
 
     /** 북마크 순위정렬 조회 */
     List<BookmarkDto.Response> getDtoListOrderBySeq();
+
+    /** 와이파이가 등록된 북마크 제외한 전체리스트 */
+    List<BookmarkDto.Response> getDtoListExcludingWifi(Long wifiId);
+
     //U
     /** 북마크 수정 */
     void update(Long id, String name, Integer sequenceNum);

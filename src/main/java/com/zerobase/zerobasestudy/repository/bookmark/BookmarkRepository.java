@@ -19,6 +19,9 @@ public interface BookmarkRepository {
     /** 북마크 전체 조회 */
     List<Bookmark> findAll(Integer limit, Sort sort);
 
+    /** 와이파이가 등록된 북마크 제외한 전체리스트 */
+    List<Bookmark> findAllExcludingWifi(Long wifiId, Integer limit, Sort sort);
+
     //U
     /** 북마크 수정 */
     int update(Long id, String name, Integer sequenceNum);

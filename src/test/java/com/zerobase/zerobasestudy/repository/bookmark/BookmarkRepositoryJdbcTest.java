@@ -86,6 +86,16 @@ class BookmarkRepositoryJdbcTest {
     }
 
     @Test
+    @DisplayName("북마크 와이파이 빼고 조회")
+    void 북마크전체조회_와이파빼고(){
+        List<Bookmark> bookmarks = repository.findAllExcludingWifi(1L, null, null);
+        for (Bookmark bookmark : bookmarks) {
+            System.out.println(bookmark.getId());
+        }
+        Assertions.assertEquals(3, bookmarks.size());
+    }
+
+    @Test
     @DisplayName("북마크 수정")
     void 북마크수정(){
 
