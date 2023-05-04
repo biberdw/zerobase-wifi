@@ -4,10 +4,13 @@ import com.zerobase.zerobasestudy.dto.bookmark.BookmarkDto;
 import com.zerobase.zerobasestudy.entity.bookmark.Bookmark;
 import com.zerobase.zerobasestudy.repository.bookmark.BookmarkRepository;
 import com.zerobase.zerobasestudy.util.Sort;
+import com.zerobase.zerobasestudy.util.constutil.DatabaseConst;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.zerobase.zerobasestudy.util.constutil.DatabaseConst.*;
 
 public class BookmarkServiceImpl implements BookmarkService{
 
@@ -37,14 +40,14 @@ public class BookmarkServiceImpl implements BookmarkService{
 
     /** 북마크 순위 정렬 리스트 */
     public List<BookmarkDto.Response> getDtoListOrderBySeq() {
-        Sort sort = new Sort("sequence_num", Sort.Direction.ASC);
+        Sort sort = new Sort(SEQUENCE_NUM, Sort.Direction.ASC);
         return bookmarkRepository.findAll(null, sort).stream()
                 .map(BookmarkDto.Response::new).collect(Collectors.toList());
     }
 
     /** 와이파이가 등록된 북마크 제외한 전체리스트 */
     public List<BookmarkDto.Response> getDtoListExcludingWifi(Long wifiId) {
-        Sort sort = new Sort("sequence_num", Sort.Direction.ASC);
+        Sort sort = new Sort(SEQUENCE_NUM, Sort.Direction.ASC);
         return bookmarkRepository.findAllExcludingWifi(wifiId, null, sort).stream()
                 .map(BookmarkDto.Response::new).collect(Collectors.toList());
     }

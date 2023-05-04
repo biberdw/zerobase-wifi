@@ -60,8 +60,8 @@ class WifiBookmarkRepositoryJdbcTest {
     @Test
     @DisplayName("와이파이북마크 전체조회")
     void 와이파이북마크_전체조회(){
-        Sort sort = new Sort("wifi_bookmark_id", Sort.Direction.ASC);
-        List<WifiBookmark> wifiBookmarks = wifiBookmarkRepository.findAll(null, sort);
+
+        List<WifiBookmark> wifiBookmarks = wifiBookmarkRepository.findAll(null, null);
 
         for (WifiBookmark wifiBookmark : wifiBookmarks) {
             System.out.println(wifiBookmark.getWifiId());

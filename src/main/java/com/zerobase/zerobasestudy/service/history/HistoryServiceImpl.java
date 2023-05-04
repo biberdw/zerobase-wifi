@@ -4,8 +4,12 @@ import com.zerobase.zerobasestudy.dto.history.HistoryDto;
 import com.zerobase.zerobasestudy.entity.history.History;
 import com.zerobase.zerobasestudy.repository.history.HistoryRepository;
 import com.zerobase.zerobasestudy.util.Sort;
+import com.zerobase.zerobasestudy.util.constutil.DatabaseConst;
+
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.zerobase.zerobasestudy.util.constutil.DatabaseConst.*;
 
 public class HistoryServiceImpl implements HistoryService{
 
@@ -25,7 +29,7 @@ public class HistoryServiceImpl implements HistoryService{
     /** 히스토리 전체조회 */
     public List<HistoryDto.Response> getHistoryDtoList() {
 
-        Sort sort = new Sort("history_id", Sort.Direction.DESC);
+        Sort sort = new Sort(HISTORY_ID, Sort.Direction.DESC);
         return historyRepository.findAll(null, sort).stream()
                 .map(HistoryDto.Response::new)
                 .collect(Collectors.toList());
