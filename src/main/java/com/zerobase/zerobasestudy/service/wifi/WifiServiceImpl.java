@@ -3,16 +3,14 @@ package com.zerobase.zerobasestudy.service.wifi;
 import com.zerobase.zerobasestudy.dto.wifi.WifiDto;
 import com.zerobase.zerobasestudy.entity.wifi.Wifi;
 import com.zerobase.zerobasestudy.repository.wifi.WifiRepository;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 public class WifiServiceImpl implements WifiService{
 
     private final WifiRepository wifiRepository;
-
-    public WifiServiceImpl(WifiRepository wifiRepository) {
-        this.wifiRepository = wifiRepository;
-    }
 
 
     /** 와이파이 배치 등록 */

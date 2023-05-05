@@ -5,20 +5,17 @@ import com.zerobase.zerobasestudy.entity.history.History;
 import com.zerobase.zerobasestudy.repository.history.HistoryRepository;
 import com.zerobase.zerobasestudy.util.Sort;
 import com.zerobase.zerobasestudy.util.constutil.DatabaseConst;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.zerobase.zerobasestudy.util.constutil.DatabaseConst.*;
 
+@RequiredArgsConstructor
 public class HistoryServiceImpl implements HistoryService{
 
     private final HistoryRepository historyRepository;
-
-    public HistoryServiceImpl(HistoryRepository historyRepository) {
-        this.historyRepository = historyRepository;
-    }
-
 
 
     /** 히스토리 등록 */
