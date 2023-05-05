@@ -13,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RequiredArgsConstructor
 public class BookmarkRepositoryJdbcV1 implements BookmarkRepository{
@@ -75,6 +76,31 @@ public class BookmarkRepositoryJdbcV1 implements BookmarkRepository{
             return Optional.empty();
 
         }catch (SQLException cause) {
+            throw new SqlException(cause.getMessage(), cause);
+        }finally {
+            release(conn, stmt, rs);
+        }
+    }
+
+
+    public boolean findByName(String name) {
+        String sql = "select count(name) as count from bookmark where name = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, name);
+            rs = stmt.executeQuery();
+
+            AtomicInteger count = new AtomicInteger(0);
+            if(rs.next()){
+                count.getAndAdd(rs.getInt("count"));
+            }
+            return count.get() == 1;
+
+        } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         }finally {
             release(conn, stmt, rs);

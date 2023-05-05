@@ -84,6 +84,11 @@ public class BookmarkRepositoryJdbc implements BookmarkRepository{
         }
     }
 
+    @Override
+    public boolean findByName(String name) {
+        return false;
+    }
+
     /** 북마크 전체 조회 */
     public List<Bookmark> findAll(Integer limit, Sort sort) {
 

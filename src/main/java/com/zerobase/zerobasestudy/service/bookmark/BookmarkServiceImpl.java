@@ -5,6 +5,7 @@ import com.zerobase.zerobasestudy.entity.bookmark.Bookmark;
 import com.zerobase.zerobasestudy.repository.bookmark.BookmarkRepository;
 import com.zerobase.zerobasestudy.util.Sort;
 import com.zerobase.zerobasestudy.util.constutil.DatabaseConst;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,23 +13,21 @@ import java.util.stream.Collectors;
 
 import static com.zerobase.zerobasestudy.util.constutil.DatabaseConst.*;
 
+@RequiredArgsConstructor
 public class BookmarkServiceImpl implements BookmarkService{
 
-    BookmarkRepository bookmarkRepository;
+    private final BookmarkRepository bookmarkRepository;
 
-    public BookmarkServiceImpl(BookmarkRepository bookmarkRepository) {
-        this.bookmarkRepository = bookmarkRepository;
-    }
+    /** 즐겨찾기 저장 */
+    public void save(String name, Integer sequence) {
 
-    public int save(String name, Integer sequence) {
         Bookmark bookmark = Bookmark.builder()
                 .name(name)
                 .sequenceNum(sequence)
                 .created(LocalDateTime.now())
                 .modified(LocalDateTime.now())
                 .build();
-
-        return bookmarkRepository.save(bookmark);
+        bookmarkRepository.save(bookmark);
     }
 
 
@@ -57,23 +56,17 @@ public class BookmarkServiceImpl implements BookmarkService{
         Bookmark bookmark = bookmarkRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("존재하지 않는 북마크 id= " + id));
 
-
-
         //둘중에 하나라도 변경이 있을 때
         if(!bookmark.getName().equals(name) || bookmark.getSequenceNum() != sequenceNum){
-            //이름은 기존과 같지만 순서가 변경됐을 때
-            if(bookmark.getName().equals(name) && bookmark.getSequenceNum() != sequenceNum){
                 bookmarkRepository.update(id, null, sequenceNum);
 
             //이름이 변경되고 순서는 같을 때
-            }else if(!bookmark.getName().equals(name) && bookmark.getSequenceNum() == sequenceNum)  {
+        }else if(!bookmark.getName().equals(name) && bookmark.getSequenceNum() == sequenceNum)  {
                 bookmarkRepository.update(id, name, null);
             //둘다 변경 됐을 때
-            }else  {
-                bookmarkRepository.update(id, name, sequenceNum);
-            }
+        }else  {
+            bookmarkRepository.update(id, name, sequenceNum);
         }
-
     }
 
 
@@ -82,5 +75,10 @@ public class BookmarkServiceImpl implements BookmarkService{
                 new IllegalArgumentException("존재하지 않는 즐겨찾기 입니다. id =" + id));
 
         bookmarkRepository.deleteById(bookmark.getId());
+    }
+
+    /** 닉네임 중복조회 */
+    public boolean existByName(String name) {
+        return bookmarkRepository.findByName(name);
     }
 }

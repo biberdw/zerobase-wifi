@@ -2,14 +2,17 @@ package com.zerobase.zerobasestudy.repository.bookmark;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import com.zerobase.zerobasestudy.config.init.DbInitializer;
 import com.zerobase.zerobasestudy.entity.bookmark.Bookmark;
 import com.zerobase.zerobasestudy.repository.history.HistoryRepositoryJdbc;
 import com.zerobase.zerobasestudy.util.Sort;
+import com.zerobase.zerobasestudy.util.TxManagerJdbc;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import javax.sql.DataSource;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -24,13 +27,10 @@ class BookmarkRepositoryJdbcTest {
 
     @BeforeEach
     void beforeEach() {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(URL);
-        config.setUsername(USERNAME);
-        config.setPassword(PASSWORD);
-        config.setDriverClassName(DRIVER);
-        HikariDataSource dataSource = new HikariDataSource(config);
-        repository = new BookmarkRepositoryJdbc(dataSource);
+        DataSource dataSource = DbInitializer.getDataSource();
+        TxManagerJdbc txManagerJdbc = new TxManagerJdbc(dataSource);
+
+        repository = new BookmarkRepositoryJdbcV1(txManagerJdbc);
     }
 
 
@@ -114,5 +114,19 @@ class BookmarkRepositoryJdbcTest {
         //둘다 변경 됐을 때
 
 //        repository.update();
+    }
+
+    @Test
+    void 이름중복검사(){
+        Bookmark bookmark = Bookmark.builder()
+                .name("내학교")
+                .sequenceNum(2)
+                .created(LocalDateTime.now())
+                .modified(LocalDateTime.now())
+                .build();
+
+        repository.save(bookmark);
+        boolean result = repository.findByName("내학교");
+        Assertions.assertEquals(true, result);
     }
 }

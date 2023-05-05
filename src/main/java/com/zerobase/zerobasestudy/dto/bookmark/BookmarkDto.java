@@ -1,5 +1,6 @@
 package com.zerobase.zerobasestudy.dto.bookmark;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.zerobase.zerobasestudy.entity.bookmark.Bookmark;
 import com.zerobase.zerobasestudy.entity.history.History;
 import lombok.Data;
@@ -9,6 +10,18 @@ import java.time.LocalDateTime;
 
 public class BookmarkDto {
 
+
+    @Data
+    public static class Request{
+        private Long id;
+        @JsonProperty
+        private String name;
+        private Integer sequenceNum;
+        private LocalDateTime created;
+        private LocalDateTime modified;
+
+
+    }
 
     @Data
     @NoArgsConstructor

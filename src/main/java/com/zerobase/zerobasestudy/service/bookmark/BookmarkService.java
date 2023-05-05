@@ -9,7 +9,7 @@ import java.util.List;
 public interface BookmarkService {
     //C
     /** 북마크 등록 */
-    int save(String name, Integer sequence);
+    void save(String name, Integer sequence);
 
     //R
     /** 북마크 조회 */
@@ -28,4 +28,7 @@ public interface BookmarkService {
     //D
     /** 북마크 삭제 */
     void delete(Long id);
+
+    /** 북마크 중복 조회 */
+    boolean existByName(String name);
 }
