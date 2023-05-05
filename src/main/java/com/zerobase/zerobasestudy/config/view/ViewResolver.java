@@ -22,6 +22,8 @@ public class ViewResolver {
     public View resolveViewName(String viewName){
         if (viewName.startsWith("redirect:")) {
             return new RedirectView(viewName.substring("redirect:".length()));
+        } else if (viewName.startsWith("json")){
+          return new JsonView();
         } else {
             return new BasicView(prefix + viewName + suffix);
         }
