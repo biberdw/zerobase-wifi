@@ -30,13 +30,12 @@ public class TxManagerJdbc {
         }
 
         Connection connection = connections.get();
-        System.out.println("TXMANAGER= " + connection.hashCode());
         return connection;
     }
 
     public void release(Connection conn) {
         try {
-            if(!connections.get().equals(conn) || connections.get() == null ){
+            if(connections.get() == null){
                 System.out.println("여기 절대 걸리면 안돼");
                 conn.close();;
             }
