@@ -8,11 +8,19 @@ import java.util.Map;
 
 public interface Controller {
 
-    String get(Map<String, String> paramMap, Map<String, Object> model);
+    default String get(Map<String, String> paramMap, Map<String, Object> model) {
+        return "500";
+    }
 
-    String post(Map<String, String> paramMap, Map<String, Object> model);
+    default String post(Map<String, String> paramMap, Map<String, Object> model) {
+        return "500";
+    }
 
-    String put(Map<String, String> paramMap, Map<String, Object> model);
+    default String put(Map<String, String> paramMap, Map<String, Object> model) {
+        return "500";
+    }
 
-    String delete(Map<String, String> paramMap, Map<String, Object> model);
+    default String delete(Map<String, String> paramMap, Map<String, Object> model) {
+        return "500";
+    }
 }

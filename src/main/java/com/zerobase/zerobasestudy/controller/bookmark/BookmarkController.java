@@ -3,16 +3,20 @@ package com.zerobase.zerobasestudy.controller.bookmark;
 import com.zerobase.zerobasestudy.controller.Controller;
 import com.zerobase.zerobasestudy.dto.bookmark.BookmarkDto;
 import com.zerobase.zerobasestudy.service.bookmark.BookmarkService;
+import com.zerobase.zerobasestudy.util.validation.StaticUtils;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
 
-public class BookmarkController implements Controller {
-    BookmarkService bookmarkService;
+import static com.zerobase.zerobasestudy.util.validation.StaticUtils.*;
 
-    public BookmarkController(BookmarkService bookmarkService) {
-        this.bookmarkService = bookmarkService;
-    }
+@RequiredArgsConstructor
+public class BookmarkController implements Controller {
+
+    private final BookmarkService bookmarkService;
+
+
 
     public String get(Map<String, String> paramMap, Map<String, Object> model){
 
@@ -55,6 +59,7 @@ public class BookmarkController implements Controller {
         String name = paramMap.get("name");
         String sequenceStr = paramMap.get("sequenceNum");
 
+
         if(name.equals("") || name == null || sequenceStr.equals("") || sequenceStr == null){
             throw new IllegalArgumentException("즐겨찾기 이름과 순서는 공백 또는 비어있을 수 없습니다");
         }
@@ -77,21 +82,4 @@ public class BookmarkController implements Controller {
         return "redirect:/apps/bookmarks";
     }
 
-    private Long isValidLong(String idStr) {
-        try{
-            Long value = Long.parseLong(idStr);
-            return value;
-        }catch (NumberFormatException e){
-            throw new IllegalArgumentException("잘못된 필드 = " + e);
-        }
-    }
-
-    private Integer isValidInt(String sequenceStr) {
-        try{
-            Integer value = Integer.parseInt(sequenceStr);
-            return value;
-        }catch (NumberFormatException e){
-            throw new IllegalArgumentException("잘못된 필드 = " + e);
-        }
-    }
 }
