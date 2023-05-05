@@ -11,9 +11,10 @@
     <title>Title</title>
 </head>
 <script>
-    let count = "${count}";
-    alert(count + '개의 데이터를 업데이트 하였습니다.');
-    window.location.href='/apps/wifi';
+    let message = "${message}";
+    let url = "${url}";
+    alert(message);
+    window.location.href=url;
 </script>
 <body>
 

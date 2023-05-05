@@ -8,20 +8,20 @@ import com.zerobase.zerobasestudy.entity.wifi.Wifi;
 import com.zerobase.zerobasestudy.service.bookmark.BookmarkService;
 import com.zerobase.zerobasestudy.service.history.HistoryService;
 import com.zerobase.zerobasestudy.service.wifi.WifiService;
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 import java.util.Map;
 
+import static com.zerobase.zerobasestudy.util.validation.StaticUtils.*;
+
+@RequiredArgsConstructor
 public class WifiController implements Controller {
 
     private final WifiService wifiService;
     private final HistoryService historyService;
     private final BookmarkService bookmarkService;
 
-    public WifiController(WifiService wifiService, HistoryService historyService,BookmarkService bookmarkService) {
-        this.wifiService = wifiService;
-        this.historyService = historyService;
-        this.bookmarkService = bookmarkService;
-    }
     /** 와이파이 조회 */
     public String get(Map<String, String> paramMap, Map<String, Object> model){
         String idStr = paramMap.get("id");
@@ -98,36 +98,9 @@ public class WifiController implements Controller {
         }
 
 
-        model.put("count", insertCount);
-        return "count";
+        model.put("message", insertCount + "개의 데이터를 업데이트 했습니다.");
+        model.put("url" , "/apps/wifi");
+        return "redirectionPage";
     }
 
-
-    public String put(Map<String, String> paramMap, Map<String, Object> model) {
-        return null;
-    }
-
-
-    public String delete(Map<String, String> paramMap, Map<String, Object> model) {
-        return null;
-    }
-
-    private static Long isValidLong(String id) {
-        try{
-            Long value = Long.parseLong(id);
-            return value;
-        }catch (NumberFormatException e){
-            throw new IllegalArgumentException("잘못된 필드 = " + e);
-        }
-    }
-
-    /** Double 자료형 검증 */
-    private static Double isValidDouble(String arg) {
-        try{
-            Double value = Double.parseDouble(arg);
-            return value;
-        }catch (NumberFormatException e){
-            throw new IllegalArgumentException("잘못된 필드 = " + e);
-        }
-    }
 }
