@@ -5,7 +5,7 @@ import com.zerobase.zerobasestudy.repository.wifi.WifiRepository;
 import com.zerobase.zerobasestudy.repository.wifi.WifiRepositoryJdbcV1;
 import com.zerobase.zerobasestudy.service.Strs;
 import com.zerobase.zerobasestudy.service.wifi.WifiService;
-import com.zerobase.zerobasestudy.service.wifi.WifiServiceImplV1;
+import com.zerobase.zerobasestudy.service.wifi.WifiServiceImpl;
 import com.zerobase.zerobasestudy.util.TxManagerJdbc;
 import com.zerobase.zerobasestudy.util.proxy.TxHandler;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +24,7 @@ public class proxyTest {
 
 
         WifiRepository wifiRepository = new WifiRepositoryJdbcV1(txManagerJdbc);
-        WifiService wifiService = new WifiServiceImplV1(wifiRepository);
+        WifiService wifiService = new WifiServiceImpl(wifiRepository);
 
         WifiService proxy = (WifiService) Proxy.newProxyInstance(WifiService.class.getClassLoader(),
                 new Class[]{WifiService.class},

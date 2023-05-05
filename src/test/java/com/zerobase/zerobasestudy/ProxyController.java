@@ -2,7 +2,6 @@ package com.zerobase.zerobasestudy;
 
 import com.zerobase.zerobasestudy.dto.wifi.WifiDto;
 import com.zerobase.zerobasestudy.service.wifi.WifiService;
-import com.zerobase.zerobasestudy.service.wifi.WifiServiceImplV1;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
