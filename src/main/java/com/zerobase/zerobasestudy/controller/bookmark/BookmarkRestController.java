@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Map;
 
 import static com.zerobase.zerobasestudy.util.HttpHeaders.*;
+import static com.zerobase.zerobasestudy.util.HttpStatus.*;
 
 @RequiredArgsConstructor
 public class BookmarkRestController implements RestController {
@@ -36,9 +37,15 @@ public class BookmarkRestController implements RestController {
         httpHeaders.set(CONTENT_TYPE, "application/json; charset=UTF-8");
 
         if(flag){ //이미 존재하면
-            return new ResponseEntity<>(httpHeaders, null, HttpStatus.CONFLICT);
+            return ResponseEntity.builder()
+                    .httpHeaders(httpHeaders)
+                    .httpStatus(CONFLICT)
+                    .build();
         }else { //존재하지 않으면
-            return new ResponseEntity<>(httpHeaders, null, HttpStatus.OK);
+            return ResponseEntity.builder()
+                    .httpHeaders(httpHeaders)
+                    .httpStatus(OK)
+                    .build();
         }
     }
 
