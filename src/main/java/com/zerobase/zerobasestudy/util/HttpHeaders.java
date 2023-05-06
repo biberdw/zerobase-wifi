@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 public class HttpHeaders  {
@@ -76,7 +77,7 @@ public class HttpHeaders  {
     private final Map<String, List<String>> headers;
 
     public HttpHeaders() {
-        headers = new HashMap<>();
+        headers = new ConcurrentHashMap<>();
     }
 
     public void set(String headerName, String headerValue) {

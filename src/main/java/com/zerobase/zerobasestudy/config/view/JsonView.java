@@ -24,7 +24,8 @@ public class JsonView implements View{
         HttpHeaders httpHeaders = responseEntity.getHttpHeaders();
         HttpStatus httpStatus = responseEntity.getHttpStatus();
 
-        String json = "";
+
+        String json = objectMapper.writeValueAsString("");
         if(body != null){
             json = objectMapper.writeValueAsString(body);
         }

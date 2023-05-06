@@ -45,8 +45,12 @@ public class BookmarkController implements Controller {
     public String post(Map<String, String> paramMap, Map<String, Object> model) {
         String name = paramMap.get("name");
         String sequenceStr = paramMap.get("sequenceNum");
+
+        //유효성 검증
+        isNullParameters(name, sequenceStr);
         Integer sequence = isValidInt(sequenceStr);
 
+        //로직
         bookmarkService.save(name, sequence);
 
         return "redirect:/apps/bookmarks";
@@ -58,16 +62,14 @@ public class BookmarkController implements Controller {
     public String put(Map<String, String> paramMap, Map<String, Object> model) {
         String name = paramMap.get("name");
         String sequenceStr = paramMap.get("sequenceNum");
-
-
-        if(name.equals("") || name == null || sequenceStr.equals("") || sequenceStr == null){
-            throw new IllegalArgumentException("즐겨찾기 이름과 순서는 공백 또는 비어있을 수 없습니다");
-        }
-
         String idStr = paramMap.get("id");
 
+        //유효성 검증
+        isNullParameters(name, sequenceStr);
         Integer sequence = isValidInt(sequenceStr);
         Long id = isValidLong(idStr);
+
+        //로직
         bookmarkService.update(id, name, sequence);
 
         return "redirect:/apps/bookmarks";
@@ -82,4 +84,9 @@ public class BookmarkController implements Controller {
         return "redirect:/apps/bookmarks";
     }
 
+    private static void isNullParameters(String name, String sequenceStr) {
+        if(name.equals("") || name == null || sequenceStr.equals("") || sequenceStr == null){
+            throw new IllegalArgumentException("즐겨찾기 이름과 순서는 공백 또는 비어있을 수 없습니다");
+        }
+    }
 }

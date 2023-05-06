@@ -29,6 +29,10 @@ public interface BookmarkService {
     /** 북마크 삭제 */
     void delete(Long id);
 
-    /** 북마크 중복 조회 */
-    boolean existByName(String name);
+    /**
+     * @param name
+     * @param id 수정할 때 조회시 기존 이름 확인위해서 필요 (등록이면 null)
+     * @return
+     */
+    boolean existByName(String name, Long id);
 }

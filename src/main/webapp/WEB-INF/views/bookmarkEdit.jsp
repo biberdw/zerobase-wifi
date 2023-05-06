@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="/css/table.css">
     <link rel="stylesheet" type="text/css" href="/css/tableDetail.css">
     <link rel="stylesheet" type="text/css" href="/css/bookmarkEdit.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 </head>
 <body>
@@ -22,7 +22,10 @@
         <table>
             <tr>
                 <th>즐겨찾기 이름</th>
-                <td><input type="text" name="name" value="${bookmark.name}"></td>
+                <td><input id="name-input" type="text" name="name" value="${bookmark.name}">
+                    <input id="valid-input" type="hidden" value="0">
+                    <button id="name-btn" type="button" style="margin-left: 10px">중복 검사</button>
+                </td>
             </tr>
             <tr>
                 <th>순서</th>
@@ -38,16 +41,17 @@
                             <a>돌아가기</a>&nbsp;|
                             <button id="submit-btn" type="submit">수정</button>
                             <input type="hidden" name="_method" value="PUT"/>
-                            <input type="hidden" name="id" value="${bookmark.id}">
+                            <input id="id-input" type="hidden" name="id" value="${bookmark.id}">
                         </c:when>
                     </c:choose>
                 </td>
             </tr>
         </table>
     </form>
-
+    <input id="mode" type="hidden" value="${mode}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="/js/validBookmarkEdit.js"></script>
-
+    <script src="/js/validName.js"></script>
 
 </div>
 </body>

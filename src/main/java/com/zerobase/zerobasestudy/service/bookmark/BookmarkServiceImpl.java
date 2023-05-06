@@ -78,7 +78,12 @@ public class BookmarkServiceImpl implements BookmarkService{
     }
 
     /** 닉네임 중복조회 */
-    public boolean existByName(String name) {
+    public boolean existByName(String name, Long id) {
+        Bookmark bookmark = bookmarkRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 즐겨찾기"));
+        if (bookmark.getName().equals(name)){
+            return false;
+        }
+
         return bookmarkRepository.findByName(name);
     }
 }
