@@ -18,7 +18,6 @@
   <title>와이파이 정보 구하기</title>
   <link rel="stylesheet" type="text/css" href="/css/table.css">
   <link rel="stylesheet" type="text/css" href="/css/bookmarkList.css">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <div>
@@ -78,6 +77,7 @@
       </c:otherwise>
     </c:choose>
   </table>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="/js/submitDelete.js"></script>
 </div>
 </body>

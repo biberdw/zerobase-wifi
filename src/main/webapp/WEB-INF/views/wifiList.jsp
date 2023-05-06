@@ -17,7 +17,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>와이파이 정보 구하기</title>
     <link rel="stylesheet" type="text/css" href="/css/table.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/inc/header/header.jsp"/>
@@ -96,7 +95,7 @@
           </c:choose>
       </table>
   </div>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="/js/location.js"></script>
   <script src="/js/getWifi.js"></script>
   <script src="/js/isNumber.js"></script>
