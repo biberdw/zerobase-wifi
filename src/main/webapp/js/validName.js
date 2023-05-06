@@ -16,7 +16,7 @@ $('#name-btn').click(function() {
 
     let nameValue = $('#name-input').val();
     let mode = $('#mode').val();
-    let request_url = '/apps/bookmarks?name=' + nameValue;
+    let request_url = '/apps/bookmarks/name?name=' + nameValue;
     if(mode === "update"){
         let idVal = $('#id-input').val();
         request_url = request_url + "&id=" + idVal;
