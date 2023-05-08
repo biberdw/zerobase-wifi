@@ -29,7 +29,12 @@ public class BookmarkRestController implements RestController {
         String name = paramMap.get("name");
         String idStr = paramMap.get("id");
 
-        Long id = StaticUtils.isValidLong(idStr);
+        Long id = null;
+        //수정일 때
+        if(idStr != null){
+            id = StaticUtils.isValidLong(idStr);
+        }
+
 
         boolean flag = bookmarkService.existByName(name, id);
 
