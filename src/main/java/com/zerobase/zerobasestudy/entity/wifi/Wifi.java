@@ -1,12 +1,14 @@
 package com.zerobase.zerobasestudy.entity.wifi;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@EqualsAndHashCode
 public class Wifi {
 
     private Long id;
