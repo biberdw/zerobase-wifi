@@ -1,7 +1,9 @@
 package com.zerobase.zerobasestudy.service.wifi;
 
 import com.zerobase.zerobasestudy.dto.wifi.WifiDto;
+import com.zerobase.zerobasestudy.entity.bookmark.WifiBookmark;
 import com.zerobase.zerobasestudy.entity.wifi.Wifi;
+import com.zerobase.zerobasestudy.repository.bookmark.WifiBookmarkRepository;
 import com.zerobase.zerobasestudy.repository.wifi.WifiRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -11,6 +13,7 @@ import java.util.List;
 public class WifiServiceImpl implements WifiService{
 
     private final WifiRepository wifiRepository;
+    private final WifiBookmarkRepository wifiBookmarkRepository;
 
 
     /** 와이파이 배치 등록 */
@@ -24,6 +27,8 @@ public class WifiServiceImpl implements WifiService{
     }
     /** 와이파이 전체 삭제 */
     public void deleteAll() {
+        //차일드테이블 삭제
+        wifiBookmarkRepository.deleteAll();
         wifiRepository.deleteAll();
     }
 

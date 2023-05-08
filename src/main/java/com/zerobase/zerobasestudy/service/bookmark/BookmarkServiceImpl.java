@@ -2,7 +2,9 @@ package com.zerobase.zerobasestudy.service.bookmark;
 
 import com.zerobase.zerobasestudy.dto.bookmark.BookmarkDto;
 import com.zerobase.zerobasestudy.entity.bookmark.Bookmark;
+import com.zerobase.zerobasestudy.entity.bookmark.WifiBookmark;
 import com.zerobase.zerobasestudy.repository.bookmark.BookmarkRepository;
+import com.zerobase.zerobasestudy.repository.bookmark.WifiBookmarkRepository;
 import com.zerobase.zerobasestudy.util.Sort;
 import com.zerobase.zerobasestudy.util.constutil.DatabaseConst;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import static com.zerobase.zerobasestudy.util.constutil.DatabaseConst.*;
 public class BookmarkServiceImpl implements BookmarkService{
 
     private final BookmarkRepository bookmarkRepository;
+    private final WifiBookmarkRepository wifiBookmarkRepository;
 
     /** 즐겨찾기 저장 */
     public void save(String name, Integer sequence) {
@@ -56,16 +59,25 @@ public class BookmarkServiceImpl implements BookmarkService{
         Bookmark bookmark = bookmarkRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("존재하지 않는 북마크 id= " + id));
 
+
         //둘중에 하나라도 변경이 있을 때
-        if(!bookmark.getName().equals(name) || bookmark.getSequenceNum() != sequenceNum){
+        if (!bookmark.getName().equals(name) || bookmark.getSequenceNum() != sequenceNum) {
+
+                //이름은 같은데 순서가 변경됐을 때
+            if(bookmark.getName().equals(name) && bookmark.getSequenceNum() != sequenceNum){
                 bookmarkRepository.update(id, null, sequenceNum);
 
-            //이름이 변경되고 순서는 같을 때
-        }else if(!bookmark.getName().equals(name) && bookmark.getSequenceNum() == sequenceNum)  {
+                //이름이 변경되고 순서는 같을 때
+            } else if (!bookmark.getName().equals(name) && bookmark.getSequenceNum() == sequenceNum) {
+                wifiBookmarkRepository.updateBookmarkNameByBookmarkId(name, bookmark.getId());
                 bookmarkRepository.update(id, name, null);
-            //둘다 변경 됐을 때
-        }else  {
-            bookmarkRepository.update(id, name, sequenceNum);
+
+                //둘다 변경 됐을 때
+            } else {
+                wifiBookmarkRepository.updateBookmarkNameByBookmarkId(name, bookmark.getId());
+                bookmarkRepository.update(id, name, sequenceNum);
+            }
+
         }
     }
 
@@ -73,7 +85,8 @@ public class BookmarkServiceImpl implements BookmarkService{
     public void delete(Long id) {
         Bookmark bookmark = bookmarkRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("존재하지 않는 즐겨찾기 입니다. id =" + id));
-
+        //차일드테이블 삭제
+        wifiBookmarkRepository.deleteByBookmarkId(id);
         bookmarkRepository.deleteById(bookmark.getId());
     }
 
