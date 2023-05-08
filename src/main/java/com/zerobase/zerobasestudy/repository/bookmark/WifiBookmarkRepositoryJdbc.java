@@ -1,23 +1,21 @@
+
 package com.zerobase.zerobasestudy.repository.bookmark;
 
 import com.zerobase.zerobasestudy.entity.bookmark.WifiBookmark;
+import com.zerobase.zerobasestudy.util.ConnectionSyncManager;
 import com.zerobase.zerobasestudy.util.Sort;
 import com.zerobase.zerobasestudy.util.exception.SqlException;
+import lombok.RequiredArgsConstructor;
 
-import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 public class WifiBookmarkRepositoryJdbc implements WifiBookmarkRepository{
 
-    private final DataSource dataSource;
-
-    public WifiBookmarkRepositoryJdbc(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
 
     public int save(WifiBookmark wifiBookmark) {
 
@@ -27,7 +25,7 @@ public class WifiBookmarkRepositoryJdbc implements WifiBookmarkRepository{
         PreparedStatement stmt = null;
 
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql.toString());
 
             setDynamicParameters(wifiBookmark, stmt);
@@ -36,9 +34,11 @@ public class WifiBookmarkRepositoryJdbc implements WifiBookmarkRepository{
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, null);
+            release(conn, stmt, null);
         }
     }
+
+
 
 
     public List<WifiBookmark> findAll(Integer limit, Sort sort) {
@@ -52,7 +52,7 @@ public class WifiBookmarkRepositoryJdbc implements WifiBookmarkRepository{
         ResultSet rs = null;
 
         try{
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
             rs = stmt.executeQuery();
 
@@ -72,7 +72,7 @@ public class WifiBookmarkRepositoryJdbc implements WifiBookmarkRepository{
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, rs);
+            release(conn, stmt, rs);
         }
     }
 
@@ -84,7 +84,7 @@ public class WifiBookmarkRepositoryJdbc implements WifiBookmarkRepository{
         PreparedStatement stmt = null;
 
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setLong(1, wifiId);
             stmt.setLong(2, bookmarkId);
@@ -96,12 +96,117 @@ public class WifiBookmarkRepositoryJdbc implements WifiBookmarkRepository{
             cause.printStackTrace();
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, null);
+            release(conn, stmt, null);
+        }
+    }
+
+
+    public List<WifiBookmark> findAllByBookmarkId(Long bookmarkId) {
+        String sql = "SELECT wifi_name, bookmark_name, bookmark_id, wifi_id, created FROM wifi_bookmark " +
+                " where bookmark_id = ?";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try{
+            conn = getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setLong(1, bookmarkId);
+            rs = stmt.executeQuery();
+
+            List<WifiBookmark> wifiBookmarks = new ArrayList<>();
+            while(rs.next()){
+                WifiBookmark wifiBookmark = WifiBookmark.builder()
+                        .wifiName(rs.getString("wifi_name"))
+                        .bookmarkName(rs.getString("bookmark_name"))
+                        .bookmarkId(rs.getLong("bookmark_id"))
+                        .wifiId(rs.getLong("wifi_id"))
+                        .created(LocalDateTime.parse(rs.getString("created"), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                        .build();
+                wifiBookmarks.add(wifiBookmark);
+            }
+            return wifiBookmarks;
+
+        } catch (SQLException cause) {
+            throw new SqlException(cause.getMessage(), cause);
+        } finally {
+            release(conn, stmt, rs);
+        }
+
+    }
+
+
+    public int updateBookmarkNameByBookmarkId(String name, Long bookmarkId) {
+        String sql = "update wifi_bookmark set bookmark_name = ? " +
+                "where bookmark_id = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, name);
+            stmt.setLong(2, bookmarkId);
+
+            return stmt.executeUpdate();
+
+
+        } catch (SQLException cause) {
+            cause.printStackTrace();
+            throw new SqlException(cause.getMessage(), cause);
+        } finally {
+            release(conn, stmt, null);
+        }
+
+    }
+
+
+    public int deleteByBookmarkId(Long bookmarkId) {
+        String sql = "delete from wifi_bookmark where bookmark_id = ?";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setLong(1, bookmarkId);
+
+            return stmt.executeUpdate();
+
+
+        } catch (SQLException cause) {
+            cause.printStackTrace();
+            throw new SqlException(cause.getMessage(), cause);
+        } finally {
+            release(conn, stmt, null);
+        }
+    }
+
+
+    public int deleteAll() {
+        String sql = "delete from wifi_bookmark";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = getConnection();
+            stmt = conn.prepareStatement(sql);
+
+            return stmt.executeUpdate();
+
+        } catch (SQLException cause) {
+            cause.printStackTrace();
+            throw new SqlException(cause.getMessage(), cause);
+        } finally {
+            release(conn, stmt, null);
         }
     }
 
     /** 커넥션 종료(반환) */
-    private void close(Connection conn, Statement stmt, ResultSet rs) {
+    private void release(Connection conn, Statement stmt, ResultSet rs) {
         if (rs != null) {
             try {
                 rs.close();
@@ -116,15 +221,12 @@ public class WifiBookmarkRepositoryJdbc implements WifiBookmarkRepository{
                 throw new SqlException(cause.getMessage(), cause);
             }
         }
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException cause) {
-                throw new SqlException(cause.getMessage(), cause);
-            }
-        }
+        ConnectionSyncManager.release(conn);
     }
 
+    private Connection getConnection() throws SQLException {
+        return ConnectionSyncManager.getConnection();
+    }
     private static StringBuilder buildDynamicInsertSql(WifiBookmark wifiBookmark) {
         int parameterIndex = 0;
         StringBuilder sql = new StringBuilder();
@@ -161,6 +263,7 @@ public class WifiBookmarkRepositoryJdbc implements WifiBookmarkRepository{
 
         return sql;
     }
+
 
     private static void setDynamicParameters(WifiBookmark wifiBookmark, PreparedStatement stmt) throws SQLException {
         int parameterIndex = 1;
