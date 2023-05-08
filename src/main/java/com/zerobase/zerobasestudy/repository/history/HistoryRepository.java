@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface HistoryRepository {
     /** 히스토리 등록 */
-    int save(Double latitude, Double longitude);
+    int save(History history);
 
     /** 히스토리 단건 조회 */
     Optional<History> findById(Long id);

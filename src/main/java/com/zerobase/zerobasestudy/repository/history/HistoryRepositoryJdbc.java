@@ -1,11 +1,11 @@
 package com.zerobase.zerobasestudy.repository.history;
 
 import com.zerobase.zerobasestudy.entity.history.History;
+import com.zerobase.zerobasestudy.util.ConnectionSyncManager;
 import com.zerobase.zerobasestudy.util.Sort;
-import com.zerobase.zerobasestudy.util.constutil.OrderBy;
 import com.zerobase.zerobasestudy.util.exception.SqlException;
+import lombok.RequiredArgsConstructor;
 
-import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -13,17 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 public class HistoryRepositoryJdbc implements HistoryRepository {
 
-    private final DataSource dataSource;
-
-
-    public HistoryRepositoryJdbc(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
 
     /** 히스토리 등록 */
-    public int save(Double latitude, Double longitude) {
+    public int save(History history) {
         String sql = "INSERT INTO history (longitude, latitude, created) "
                 + "VALUES (?, ?, ?)";
 
@@ -31,11 +26,11 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
         PreparedStatement stmt = null;
 
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
-            stmt.setDouble(1, longitude);
-            stmt.setDouble(2, latitude);
-            stmt.setString(3, LocalDateTime.now().toString());
+            stmt.setDouble(1, history.getLongitude());
+            stmt.setDouble(2, history.getLatitude());
+            stmt.setString(3, history.getCreated().toString());
 
 
             return stmt.executeUpdate();
@@ -44,10 +39,12 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, null);
+            release(conn, stmt, null);
+
         }
 
     }
+
 
     /** 히스토리 단건 조회 */
     public Optional<History> findById(Long id) {
@@ -59,7 +56,7 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
         ResultSet rs = null;
 
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setLong(1, id);
             rs = stmt.executeQuery();
@@ -78,7 +75,7 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, rs);
+            release(conn, stmt, rs);
         }
     }
 
@@ -95,7 +92,7 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
 
 
         try{
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
             rs = stmt.executeQuery();
 
@@ -114,7 +111,7 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, rs);
+            release(conn, stmt, rs);
         }
     }
 
@@ -127,7 +124,7 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
 
 
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setLong(1, id);
 
@@ -138,15 +135,19 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, null);
+            release(conn, stmt, null);
+
         }
 
     }
 
 
+    private Connection getConnection() throws SQLException {
+        return ConnectionSyncManager.getConnection();
+    }
 
     /** 커넥션 종료(반환) */
-    private void close(Connection conn, Statement stmt, ResultSet rs) {
+    private void release(Connection conn, Statement stmt, ResultSet rs) {
         if (rs != null) {
             try {
                 rs.close();
@@ -161,12 +162,6 @@ public class HistoryRepositoryJdbc implements HistoryRepository {
                 throw new SqlException(cause.getMessage(), cause);
             }
         }
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException cause) {
-                throw new SqlException(cause.getMessage(), cause);
-            }
-        }
+        ConnectionSyncManager.release(conn);
     }
 }

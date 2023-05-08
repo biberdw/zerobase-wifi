@@ -7,6 +7,7 @@ import com.zerobase.zerobasestudy.util.Sort;
 import com.zerobase.zerobasestudy.util.constutil.DatabaseConst;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,13 @@ public class HistoryServiceImpl implements HistoryService{
 
     /** 히스토리 등록 */
     public void save(Double latitude, Double longitude) {
-        historyRepository.save(latitude, longitude);
+        History history = History.builder()
+                .latitude(latitude)
+                .longitude(longitude)
+                .created(LocalDateTime.now())
+                .build();
+
+        historyRepository.save(history);
     }
 
     /** 히스토리 전체조회 */
