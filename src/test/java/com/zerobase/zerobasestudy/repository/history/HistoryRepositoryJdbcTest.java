@@ -1,74 +1,71 @@
 package com.zerobase.zerobasestudy.repository.history;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
+import com.zerobase.zerobasestudy.config.init.TransactionManagerSingleton;
 import com.zerobase.zerobasestudy.entity.history.History;
-import com.zerobase.zerobasestudy.util.Sort;
-import com.zerobase.zerobasestudy.util.constutil.DatabaseConst;
-import com.zerobase.zerobasestudy.util.constutil.OrderBy;
-import org.junit.jupiter.api.Assertions;
+import com.zerobase.zerobasestudy.util.TransactionManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.zerobase.zerobasestudy.util.constutil.DatabaseConst.*;
-import static com.zerobase.zerobasestudy.util.constutil.DatabaseConst.DRIVER;
+import static com.zerobase.zerobasestudy.entity.history.InitHistory.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class HistoryRepositoryJdbcTest {
-
-    HistoryRepository repository;
+public class HistoryRepositoryJdbcTest {
+    HistoryRepository historyRepository;
+    TransactionManager transactionManager;
 
     @BeforeEach
-    void beforeEach(){
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(URL);
-        config.setUsername(USERNAME);
-        config.setPassword(PASSWORD);
-        config.setDriverClassName(DRIVER);
-        HikariDataSource dataSource = new HikariDataSource(config);
-        repository = new HistoryRepositoryJdbc(dataSource);
+    void beforeEach() {
+        transactionManager = TransactionManagerSingleton.getInstance();
+        historyRepository = new HistoryRepositoryJdbc();
+        transactionManager.getTransaction();
     }
 
-    @Test
-    @DisplayName("전체 조회")
-    void findAll() {
-        Sort sort = new Sort(HISTORY_ID, Sort.Direction.DESC);
-
-        List<History> histories = repository.findAll(5, sort);
-        for (History history : histories) {
-            System.out.println("history.getId() = " + history.getId());
-        }
-        assertEquals(5, histories.size());
-
+    @AfterEach
+    void afterEach(){
+        transactionManager.rollback();
     }
 
+
+
+    /** 히스토리 등록 */
     @Test
-    @DisplayName("단건 삽입")
     void save(){
-        Double latitude = 1.1212;
-        Double longitude = 2.1212;
+        History history = getHistory();
+        int result = historyRepository.save(history);
 
-        int count = repository.save(latitude, longitude);
-        Assertions.assertEquals(1, count);
+        History findHistory = historyRepository.findById(history.getId()).orElseGet(null);
+
+        assertEquals(history, findHistory);
+        assertEquals(1, result);
 
     }
 
+    /** 히스토리 전체 조회 */
     @Test
-    @DisplayName("단건 삭제")
-    void delete(){
-        int count = repository.deleteById(1L);
-        Assertions.assertEquals(1, count);
+    void findAll(){
+        List<History> histories = getHistories();
+        histories.stream().forEach(historyRepository::save);
+
+        List<History> findHistories = historyRepository.findAll(null, null);
+
+        assertEquals(histories.size() , findHistories.size());
     }
 
+    /** 히스토리 단건 삭제 */
     @Test
-    @DisplayName("단건 조회")
-    void findById(){
-        History history = repository.findById(2L).get();
-        Assertions.assertEquals(2, history.getId());
+    void deleteById(){
+        History history = getHistory();
+        historyRepository.save(history);
+
+        int result = historyRepository.deleteById(history.getId());
+
+        assertThrows(IllegalArgumentException.class, () ->
+                historyRepository.findById(history.getId()).orElseThrow(() ->
+                new IllegalArgumentException("존재하지 않는 히스토리")));
 
     }
+
 }

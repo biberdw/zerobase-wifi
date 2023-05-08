@@ -1,132 +1,164 @@
 package com.zerobase.zerobasestudy.repository.bookmark;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-import com.zerobase.zerobasestudy.config.init.DbInitializer;
+import com.zerobase.zerobasestudy.config.init.TransactionManagerSingleton;
 import com.zerobase.zerobasestudy.entity.bookmark.Bookmark;
-import com.zerobase.zerobasestudy.repository.history.HistoryRepositoryJdbc;
-import com.zerobase.zerobasestudy.util.Sort;
-import com.zerobase.zerobasestudy.util.TxManagerJdbc;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import com.zerobase.zerobasestudy.entity.bookmark.WifiBookmark;
+import com.zerobase.zerobasestudy.entity.wifi.InitWifi;
+import com.zerobase.zerobasestudy.entity.wifi.Wifi;
+import com.zerobase.zerobasestudy.repository.wifi.WifiRepository;
+import com.zerobase.zerobasestudy.repository.wifi.WifiRepositoryJdbc;
+import com.zerobase.zerobasestudy.util.TransactionManager;
+import org.junit.jupiter.api.*;
 
-import javax.sql.DataSource;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import static com.zerobase.zerobasestudy.util.constutil.DatabaseConst.*;
-import static com.zerobase.zerobasestudy.util.constutil.DatabaseConst.DRIVER;
+import static com.zerobase.zerobasestudy.entity.bookmark.InitWifiBookmark.*;
+import static com.zerobase.zerobasestudy.entity.bookmark.InitBookmark.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class BookmarkRepositoryJdbcTest {
-
-    BookmarkRepository repository;
+public class BookmarkRepositoryJdbcTest {
+    BookmarkRepository bookmarkRepository;
+    TransactionManager transactionManager;
+    WifiRepository wifiRepository;
+    WifiBookmarkRepository wifiBookmarkRepository;
 
     @BeforeEach
-    void beforeEach() {
-        DataSource dataSource = DbInitializer.getDataSource();
-        TxManagerJdbc txManagerJdbc = new TxManagerJdbc(dataSource);
-
-        repository = new BookmarkRepositoryJdbcV1(txManagerJdbc);
-    }
-
-
-    @Test
-    @DisplayName("북마크 등록")
-    void 북마크등록() {
-        Bookmark bookmark = Bookmark.builder()
-                .name("내집")
-                .sequenceNum(1)
-                .created(LocalDateTime.now())
-                .build();
-
-        repository.save(bookmark);
-    }
-
-    @Test
-    @DisplayName("북마크 단건조회")
-    void 북마크단건조회() {
-        Bookmark bookmark = Bookmark.builder()
-                .id(6L)
-                .name("한국")
-                .sequenceNum(1)
-                .created(LocalDateTime.now())
-                .modified(LocalDateTime.now())
-                .build();
-
-        repository.save(bookmark);
-
-        Optional<Bookmark> find = repository.findById(bookmark.getId());
-        Bookmark findBookmark = find.get();
-
-        Assertions.assertEquals(bookmark.getName(), findBookmark.getName());
-
+    void beforeEach(){
+        transactionManager = TransactionManagerSingleton.getInstance();
+        bookmarkRepository = new BookmarkRepositoryJdbc();
+        wifiRepository = new WifiRepositoryJdbc();
+        wifiBookmarkRepository = new WifiBookmarkRepositoryJdbc();
+        transactionManager.getTransaction();
 
     }
 
-    @Test
-    @DisplayName("북마크 전체조회")
-    void 북마크전체조회() {
-        List<Bookmark> all = repository.findAll(null, null);
-
-        Assertions.assertEquals(7,all.size());
-
+    @AfterEach
+    void afterEach(){
+        transactionManager.rollback();
     }
 
 
+    /** 북마크 등록 */
     @Test
-    @DisplayName("북마크 단건삭제")
-    void 북마크단건삭제(){
-        int i = repository.deleteById(1L);
-        Assertions.assertEquals(1, i);
+    void save(){
+        Bookmark bookmark = getBookmark();
+        int result = bookmarkRepository.save(bookmark);
+        Bookmark findBookmark = bookmarkRepository.findById(1L).orElseGet(null);
 
+        assertEquals(bookmark, findBookmark);
+        assertEquals(1, result);
     }
 
+
+    /** 북마크 이름 중복조회 */
     @Test
-    @DisplayName("북마크 와이파이 빼고 조회")
-    void 북마크전체조회_와이파빼고(){
-        List<Bookmark> bookmarks = repository.findAllExcludingWifi(1L, null, null);
+    @DisplayName("북마크이름이 이미 존재하면 true 가 나와야한다")
+    void findByName(){
+        Bookmark bookmark = getBookmark();
+        String name1 = bookmark.getName();
+        String name2 = "내집";
+        bookmarkRepository.save(bookmark);
+
+
+        boolean trueFlag = bookmarkRepository.findByName(name1);
+        boolean falseFlag = bookmarkRepository.findByName(name2);
+
+        assertTrue(trueFlag);
+        assertFalse(falseFlag);
+    }
+
+
+    /** 북마크 전체 조회 */
+    @Test
+    void findAll(){
+        List<Bookmark> bookmarks = getBookmarks();
+        int size = bookmarks.size();
         for (Bookmark bookmark : bookmarks) {
-            System.out.println(bookmark.getId());
+            bookmarkRepository.save(bookmark);
         }
-        Assertions.assertEquals(3, bookmarks.size());
+
+
+        List<Bookmark> findBookmarks = bookmarkRepository.findAll(null, null);
+
+        assertEquals(size, findBookmarks.size());
     }
 
+    /** 와이파이가 등록된 북마크 제외한 전체리스트 */
     @Test
-    @DisplayName("북마크 수정")
-    void 북마크수정(){
+    void findAllExcludingWifi(){
+        List<Bookmark> bookmarks = getBookmarks();
+        Long firstId = bookmarks.get(0).getId();
+        for (Bookmark bookmark : bookmarks) {
+            bookmarkRepository.save(bookmark);
+        }
 
-        //둘중에 하나라도 다를때
+        List<Wifi> wifiList = new ArrayList<>();
+        Wifi wifi = InitWifi.getWifi();
+        wifiList.add(wifi);
+        wifiRepository.save(wifiList);
 
-        //이름은 기존과 같지만 순서가 변경됐을 때
-//        repository.update(2L, null, 3);
+        Wifi findWifi = wifiRepository.findById(wifi.getId()).orElseGet(null);
+        Bookmark findBookmark = bookmarkRepository.findById(firstId).orElseGet(null);
 
-//        Bookmark bookmark = repository.findById(2L).get();
-//        Assertions.assertEquals(3, bookmark.getSequenceNum());
+        WifiBookmark wifiBookmark = getWifiBookmark(findWifi, findBookmark);
 
-        //이름이 변경되고 순서는 같을 때
-        repository.update(2L, "변경집", null);
-        Bookmark bookmark = repository.findById(2L).get();
-        Assertions.assertEquals("변경집",bookmark.getName());
-        //둘다 변경 됐을 때
+        wifiBookmarkRepository.save(wifiBookmark);
 
-//        repository.update();
+        //when
+        List<Bookmark> findBookmarks = bookmarkRepository.findAllExcludingWifi(findWifi.getId(), null, null);
+
+
+        //then
+        boolean flag = findBookmarks.stream().anyMatch(bookmark -> bookmark.getId().equals(findBookmark.getId()));
+        assertFalse(flag);
     }
 
+    /** 북마크 수정 */
     @Test
-    void 이름중복검사(){
-        Bookmark bookmark = Bookmark.builder()
-                .name("내학교")
-                .sequenceNum(2)
-                .created(LocalDateTime.now())
-                .modified(LocalDateTime.now())
-                .build();
+    void update_name(){
+        Bookmark bookmark = getBookmark();
+        String updateName = "학교";
 
-        repository.save(bookmark);
-        boolean result = repository.findByName("내학교");
-        Assertions.assertEquals(true, result);
+        bookmarkRepository.save(bookmark);
+        Bookmark findBookmark = bookmarkRepository.findById(bookmark.getId()).orElseGet(null);
+
+        bookmarkRepository.update(findBookmark.getId(), updateName, bookmark.getSequenceNum());
+
+        Bookmark updatedBookmark = bookmarkRepository.findById(bookmark.getId()).orElseGet(null);
+        assertEquals(updateName, updatedBookmark.getName());
+        assertEquals(bookmark.getSequenceNum() , updatedBookmark.getSequenceNum());
+
     }
+
+    /** 북마크 수정 */
+    @Test
+    void update_sequenceNum(){
+        Bookmark bookmark = getBookmark();
+        Integer updateSequenceNum = 2;
+
+        bookmarkRepository.save(bookmark);
+        Bookmark findBookmark = bookmarkRepository.findById(bookmark.getId()).orElseGet(null);
+
+        bookmarkRepository.update(findBookmark.getId(), bookmark.getName(), updateSequenceNum);
+
+        Bookmark updatedBookmark = bookmarkRepository.findById(bookmark.getId()).orElseGet(null);
+        assertEquals(updateSequenceNum, updatedBookmark.getSequenceNum());
+        assertEquals(bookmark.getName() , updatedBookmark.getName());
+
+    }
+
+    /** 북마크 삭제 */
+    @Test
+    void delete(){
+        Bookmark bookmark = getBookmark();
+
+        bookmarkRepository.deleteById(bookmark.getId());
+
+        assertThrows(IllegalArgumentException.class, () ->
+                bookmarkRepository.findById(bookmark.getId()).orElseThrow(() ->
+                        new IllegalArgumentException("존재하지 않는 북마크")));
+
+    }
+
 }
