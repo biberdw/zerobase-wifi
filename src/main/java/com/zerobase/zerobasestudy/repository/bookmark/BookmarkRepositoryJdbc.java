@@ -1,26 +1,22 @@
 package com.zerobase.zerobasestudy.repository.bookmark;
 
 import com.zerobase.zerobasestudy.entity.bookmark.Bookmark;
+import com.zerobase.zerobasestudy.util.ConnectionSyncManager;
 import com.zerobase.zerobasestudy.util.Sort;
 import com.zerobase.zerobasestudy.util.exception.SqlException;
-import org.jetbrains.annotations.NotNull;
+import lombok.RequiredArgsConstructor;
 
-import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
+import java.util.concurrent.atomic.AtomicInteger;
 
+@RequiredArgsConstructor
 public class BookmarkRepositoryJdbc implements BookmarkRepository{
 
-    private final DataSource dataSource;
-
-    public BookmarkRepositoryJdbc(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
 
     /** 북마크 등록 */
     public int save(Bookmark bookmark) {
@@ -31,20 +27,20 @@ public class BookmarkRepositoryJdbc implements BookmarkRepository{
         PreparedStatement stmt = null;
 
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
 
             stmt.setString(1, bookmark.getName());
             stmt.setInt(2, bookmark.getSequenceNum());
-            stmt.setString(3, LocalDateTime.now().toString());
-            stmt.setString(4, LocalDateTime.now().toString());
+            stmt.setString(3, bookmark.getCreated().toString());
+            stmt.setString(4, bookmark.getModified().toString());
 
             return stmt.executeUpdate();
 
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, null);
+            release(conn, stmt, null);
         }
 
     }
@@ -60,7 +56,7 @@ public class BookmarkRepositoryJdbc implements BookmarkRepository{
         ResultSet rs = null;
 
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setLong(1, id);
             rs = stmt.executeQuery();
@@ -80,13 +76,33 @@ public class BookmarkRepositoryJdbc implements BookmarkRepository{
         }catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         }finally {
-            close(conn, stmt, rs);
+            release(conn, stmt, rs);
         }
     }
 
-    @Override
+
     public boolean findByName(String name) {
-        return false;
+        String sql = "select count(name) as count from bookmark where name = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, name);
+            rs = stmt.executeQuery();
+
+            AtomicInteger count = new AtomicInteger(0);
+            if(rs.next()){
+                count.getAndAdd(rs.getInt("count"));
+            }
+            return count.get() == 1;
+
+        } catch (SQLException cause) {
+            throw new SqlException(cause.getMessage(), cause);
+        }finally {
+            release(conn, stmt, rs);
+        }
     }
 
     /** 북마크 전체 조회 */
@@ -102,7 +118,7 @@ public class BookmarkRepositoryJdbc implements BookmarkRepository{
         ResultSet rs = null;
 
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
             rs = stmt.executeQuery();
 
@@ -127,7 +143,7 @@ public class BookmarkRepositoryJdbc implements BookmarkRepository{
             throw new SqlException(cause.getMessage(), cause);
         }
         finally {
-            close(conn, stmt, rs);
+            release(conn, stmt, rs);
         }
 
     }
@@ -147,7 +163,7 @@ public class BookmarkRepositoryJdbc implements BookmarkRepository{
         ResultSet rs = null;
 
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setLong(1, wifiId);
 
@@ -169,7 +185,7 @@ public class BookmarkRepositoryJdbc implements BookmarkRepository{
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            close(conn, stmt, rs);
+            release(conn, stmt, rs);
         }
     }
 
@@ -182,7 +198,7 @@ public class BookmarkRepositoryJdbc implements BookmarkRepository{
         PreparedStatement stmt = null;
 
         try{
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql.toString());
 
             setDynamicParameters(id, name, sequenceNum, stmt);
@@ -192,7 +208,7 @@ public class BookmarkRepositoryJdbc implements BookmarkRepository{
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, null);
+            release(conn, stmt, null);
         }
 
 
@@ -209,7 +225,7 @@ public class BookmarkRepositoryJdbc implements BookmarkRepository{
         PreparedStatement stmt = null;
 
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setLong(1, id);
 
@@ -220,13 +236,13 @@ public class BookmarkRepositoryJdbc implements BookmarkRepository{
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, null);
+            release(conn, stmt, null);
         }
 
     }
 
     /** 커넥션 종료(반환) */
-    private void close(Connection conn, Statement stmt, ResultSet rs) {
+    private void release(Connection conn, Statement stmt, ResultSet rs) {
         if (rs != null) {
             try {
                 rs.close();
@@ -241,13 +257,11 @@ public class BookmarkRepositoryJdbc implements BookmarkRepository{
                 throw new SqlException(cause.getMessage(), cause);
             }
         }
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException cause) {
-                throw new SqlException(cause.getMessage(), cause);
-            }
-        }
+        ConnectionSyncManager.release(conn);
+    }
+
+    private Connection getConnection() throws SQLException {
+        return ConnectionSyncManager.getConnection();
     }
 
     private static StringBuilder buildDynamicSql(String name, Integer sequenceNum) {
@@ -256,7 +270,8 @@ public class BookmarkRepositoryJdbc implements BookmarkRepository{
 
         if(name != null){
             sql.append(" name = ?, ");
-        } else if (sequenceNum != null) {
+        }
+        if (sequenceNum != null) {
             sql.append(" sequence_num = ?, ");
         }
 
