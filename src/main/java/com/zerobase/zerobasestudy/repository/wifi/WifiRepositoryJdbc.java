@@ -1,11 +1,11 @@
 package com.zerobase.zerobasestudy.repository.wifi;
 
 import com.zerobase.zerobasestudy.dto.wifi.WifiDto;
-import com.zerobase.zerobasestudy.entity.history.History;
 import com.zerobase.zerobasestudy.entity.wifi.Wifi;
+import com.zerobase.zerobasestudy.util.ConnectionSyncManager;
 import com.zerobase.zerobasestudy.util.exception.SqlException;
+import lombok.RequiredArgsConstructor;
 
-import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -13,13 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 public class WifiRepositoryJdbc implements WifiRepository {
-
-    private final DataSource dataSource;
-
-    public WifiRepositoryJdbc(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
 
     public int count() {
         String sql = "select count(wifi_id) from wifi";
@@ -29,7 +24,7 @@ public class WifiRepositoryJdbc implements WifiRepository {
         ResultSet rs = null;
 
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
 
             rs = stmt.executeQuery();
@@ -40,12 +35,14 @@ public class WifiRepositoryJdbc implements WifiRepository {
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, rs);
+            release(conn, stmt, rs);
         }
 
 
         return 0;
     }
+
+
 
 
     public int save(List<Wifi> wifiList) {
@@ -58,7 +55,7 @@ public class WifiRepositoryJdbc implements WifiRepository {
         PreparedStatement stmt = null;
 
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
 
             for(Wifi wifi : wifiList){
@@ -93,7 +90,7 @@ public class WifiRepositoryJdbc implements WifiRepository {
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, null);
+            release( conn, stmt, null);
         }
 
     }
@@ -103,20 +100,22 @@ public class WifiRepositoryJdbc implements WifiRepository {
         String sql = "delete from wifi";
         Connection conn = null;
         PreparedStatement stmt = null;
-
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
+
             stmt = conn.prepareStatement(sql);
-
             stmt.executeUpdate();
-
 
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, null);
+            release(conn, stmt, null);
+
+
         }
     }
+
+
 
 
     public List<WifiDto.Response> findAllByLatAndLng(Double latitude, Double longitude, Integer limit) {
@@ -133,7 +132,7 @@ public class WifiRepositoryJdbc implements WifiRepository {
         ResultSet rs = null;
 
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
 
             stmt.setDouble(1, latitude);
@@ -174,7 +173,8 @@ public class WifiRepositoryJdbc implements WifiRepository {
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, rs);
+            release(conn, stmt, rs);
+
         }
     }
 
@@ -190,7 +190,7 @@ public class WifiRepositoryJdbc implements WifiRepository {
         ResultSet rs = null;
 
         try {
-            conn = dataSource.getConnection();
+            conn = getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setLong(1, id);
 
@@ -224,11 +224,17 @@ public class WifiRepositoryJdbc implements WifiRepository {
         } catch (SQLException cause) {
             throw new SqlException(cause.getMessage(), cause);
         } finally {
-            close(conn, stmt, rs);
+            release(conn, stmt, rs);
         }
     }
 
-    private void close(Connection conn, Statement stmt, ResultSet rs) {
+
+    private Connection getConnection() throws SQLException {
+        return ConnectionSyncManager.getConnection();
+    }
+
+
+    private void release(Connection conn, Statement stmt, ResultSet rs) {
         if (rs != null) {
             try {
                 rs.close();
@@ -243,12 +249,7 @@ public class WifiRepositoryJdbc implements WifiRepository {
                 throw new SqlException(cause.getMessage(), cause);
             }
         }
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException cause) {
-                throw new SqlException(cause.getMessage(), cause);
-            }
-        }
+
+        ConnectionSyncManager.release(conn);
     }
 }
