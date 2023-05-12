@@ -3,17 +3,16 @@ package com.zerobase.zerobasestudy.config.init;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zerobase.zerobasestudy.util.exception.SqlException;
+import lombok.experimental.UtilityClass;
 
 import javax.sql.DataSource;
 
 import static com.zerobase.zerobasestudy.util.constutil.DatabaseConst.*;
 
+@UtilityClass
 public class DbInitializer {
 
     private static DataSource dataSource;
-
-    private DbInitializer(){
-    }
 
     /** db 정보 등록 및 싱글톤관리 */
     public static synchronized DataSource getDataSource() {
