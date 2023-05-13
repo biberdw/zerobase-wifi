@@ -15,7 +15,10 @@ public interface BookmarkRepository {
     /** 북마크 단건 조회 */
     Optional<Bookmark> findById(Long id);
 
-    /** 북마크 이름 중복조회 */
+    /** 북마크 이름 중복조회
+     * 있으면 true
+     * 없으면 flase
+     * */
     boolean findByName(String name);
 
     /** 북마크 전체 조회 */

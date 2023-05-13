@@ -23,6 +23,11 @@ public class BookmarkServiceImpl implements BookmarkService{
 
     /** 즐겨찾기 저장 */
     public void save(String name, Integer sequence) {
+        //이미 즐겨찾기 이름이 존재하는지 확인
+
+        if(bookmarkRepository.findByName(name)){
+            throw new IllegalArgumentException("이미 존재하는 즐겨찾기 이름");
+        }
 
         Bookmark bookmark = Bookmark.builder()
                 .name(name)
